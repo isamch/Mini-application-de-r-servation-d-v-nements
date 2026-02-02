@@ -1,0 +1,167 @@
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { UsersRepository } from '@/modules/users/repositories/users.repository';
+import { CreateUserDto } from '@/modules/users/dto/create-user.dto';
+import { UpdateUserDto } from '@/modules/users/dto/update-user.dto';
+import { User } from '@/modules/users/entities/user.entity';
+import { HashUtil } from '@/common/utils/hash.util';
+
+/**
+ * Users Service
+ * Handles user management business logic and database operations
+ */
+@Injectable()
+export class UsersService {
+  constructor(private readonly usersRepository: UsersRepository) {}
+
+  /**
+   * Create new user account
+   * Validates email uniqueness and hashes password
+   */
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const existingUser = await this.usersRepository.findByEmail(createUserDto.email);
+    if (existingUser) {
+      throw new ConflictException('Email already exists');
+    }
+
+    const hashedPassword = await HashUtil.hash(createUserDto.password);
+    const user = this.usersRepository.create({
+      ...createUserDto,
+      password: hashedPassword,
+    });
+
+    return this.usersRepository.save(user);
+  }
+
+  /**
+   * Get all users from database
+   * Returns complete list of all registered users
+   */
+  async findAll(): Promise<User[]> {
+    return this.usersRepository.find();
+  }
+
+  /**
+   * Find user by unique ID
+   * Returns user details or throws not found exception
+   */
+  async findOne(id: string): Promise<User> {
+    const user = await this.usersRepository.findById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+  /**
+   * Find user by email address
+   * Returns user or null if not found
+   */
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findByEmail(email);
+  }
+
+  /**
+   * Update user information
+   * Validates email uniqueness and hashes password if provided
+   */
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.findOne(id);
+
+    if (updateUserDto.email && updateUserDto.email !== user.email) {
+      const existingUser = await this.usersRepository.findByEmail(updateUserDto.email);
+      if (existingUser) {
+        throw new ConflictException('Email already exists');
+      }
+    }
+
+    if (updateUserDto.password) {
+      updateUserDto.password = await HashUtil.hash(updateUserDto.password);
+    }
+
+    Object.assign(user, updateUserDto);
+    return this.usersRepository.save(user);
+  }
+
+  /**
+   * Delete user account
+   * Permanently removes user from database
+   */
+  async remove(id: string): Promise<void> {
+    const user = await this.findOne(id);
+    await this.usersRepository.remove(user);
+  }
+
+  /**
+   * Update user refresh token
+   * Stores hashed refresh token for authentication
+   */
+  async updateRefreshToken(userId: string, refreshToken: string | null): Promise<void> {
+    await this.usersRepository.update(userId, { refreshToken: refreshToken || undefined });
+  }
+
+  /**
+   * Update email verification token
+   * Stores token for email verification process
+   */
+  async updateVerificationToken(userId: string, token: string): Promise<void> {
+    await this.usersRepository.update(userId, { emailVerificationToken: token });
+  }
+
+  /**
+   * Find user by verification token
+   * Returns user with matching verification token
+   */
+  async findByVerificationToken(token: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { emailVerificationToken: token } });
+  }
+
+  /**
+   * Mark user email as verified
+   * Updates verification status and clears token
+   */
+  async verifyEmail(userId: string): Promise<void> {
+    await this.usersRepository.update(userId, {
+      isEmailVerified: true,
+      emailVerificationToken: undefined,
+    });
+  }
+
+  /**
+   * Update password reset token
+   * Stores token and expiration for password reset
+   */
+  async updatePasswordResetToken(userId: string, token: string, expires: Date): Promise<void> {
+    await this.usersRepository.update(userId, {
+      passwordResetToken: token,
+      passwordResetExpires: expires,
+    });
+  }
+
+  /**
+   * Find user by password reset token
+   * Returns user with matching reset token
+   */
+  async findByPasswordResetToken(token: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { passwordResetToken: token } });
+  }
+
+  /**
+   * Update user password
+   * Hashes and stores new password
+   */
+  async updatePassword(userId: string, newPassword: string): Promise<void> {
+    const hashedPassword = await HashUtil.hash(newPassword);
+    await this.usersRepository.update(userId, { password: hashedPassword });
+  }
+
+  /**
+   * Clear password reset token
+   * Removes reset token and expiration after use
+   */
+  async clearPasswordResetToken(userId: string): Promise<void> {
+    await this.usersRepository.update(userId, {
+      passwordResetToken: undefined,
+      passwordResetExpires: undefined,
+    });
+  }
+}
