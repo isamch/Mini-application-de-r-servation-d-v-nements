@@ -22,17 +22,17 @@
   */
 export enum UserPermissions {
   // Read permissions
-READ_USER = 'read:user',
-READ_ALL_USERS = 'read:all_users',
+  READ_USER = 'read:user',
+  READ_ALL_USERS = 'read:all_users',
 
   // Write permissions
-CREATE_USER = 'create:user',
-UPDATE_USER = 'update:user',
-UPDATE_OWN_USER = 'update:own_user',
+  CREATE_USER = 'create:user',
+  UPDATE_USER = 'update:user',
+  UPDATE_OWN_USER = 'update:own_user',
 
   // Delete permissions
-DELETE_USER = 'delete:user',
-DELETE_OWN_USER = 'delete:own_user',
+  DELETE_USER = 'delete:user',
+  DELETE_OWN_USER = 'delete:own_user',
 
   // TODO: Add more permissions as needed
 }
@@ -49,20 +49,19 @@ export class PermissionHelper {
   */
   static hasPermission(userPermissions: string[], required: UserPermissions): boolean {
     return userPermissions.includes(required);
-}
+  }
 
-/**
-  * Check if user has any of the permissions
-  */
-static hasAnyPermission(userPermissions: string[], required: UserPermissions[]): boolean {
-return required.some(permission => userPermissions.includes(permission));
-}
+  /**
+    * Check if user has any of the permissions
+    */
+  static hasAnyPermission(userPermissions: string[], required: UserPermissions[]): boolean {
+    return required.some(permission => userPermissions.includes(permission));
+  }
 
-/**
-  * Check if user has all permissions
-  */
-static hasAllPermissions(userPermissions: string[], required: UserPermissions[]): boolean {
-return required.every(permission => userPermissions.includes(permission));
+  /**
+    * Check if user has all permissions
+    */
+  static hasAllPermissions(userPermissions: string[], required: UserPermissions[]): boolean {
+    return required.every(permission => userPermissions.includes(permission));
+  }
 }
-}
-  
