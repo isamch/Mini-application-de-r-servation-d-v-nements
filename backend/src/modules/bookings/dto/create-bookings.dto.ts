@@ -1,22 +1,23 @@
-import { IsString, IsOptional, IsBoolean } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, MaxLength, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-/**
- * Create Bookings DTO
- * Data transfer object for creating new bookings
- */
 export class CreateBookingsDto {
-  @ApiProperty({ description: 'Bookings name', example: 'Sample Bookings' })
-  @IsString()
-  name: string;
+  @ApiProperty({ 
+    description: 'The unique UUID of the event', 
+    example: 'd290f1ee-6c54-4b01-90e6-d701748f0851' 
+  })
+  @IsUUID()
+  @IsNotEmpty()
+  eventId: string;
 
-  @ApiProperty({ description: 'Bookings description', required: false })
+  @ApiProperty({ 
+    description: 'Additional notes or special requests for this booking', 
+    example: 'I need a front-row seat if possible.',
+    required: false,
+    maxLength: 500
+  })
   @IsOptional()
   @IsString()
-  description?: string;
-
-  @ApiProperty({ description: 'Active status', default: true, required: false })
-  @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
+  @MaxLength(500)
+  notes?: string;
 }
