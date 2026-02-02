@@ -8,6 +8,8 @@ import {
   OneToMany,
 } from 'typeorm';
 import { UserRole } from '../../../common/constants/roles.constant';
+import { Events } from '../../events/entities/events.entity';
+import { Bookings } from '../../bookings/entities/bookings.entity';
 
 @Entity('users')
 export class User {
@@ -60,7 +62,11 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  // Relations will be added later
-  // @OneToMany(() => Booking, booking => booking.user)
-  // bookings: Booking[];
+  // Relations
+  @OneToMany(() => Events, event => event.createdBy)
+  createdEvents: Events[];
+
+  @OneToMany(() => Bookings, booking => booking.user)
+  bookings: Bookings[];
+
 }

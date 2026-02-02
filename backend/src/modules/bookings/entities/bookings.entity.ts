@@ -50,6 +50,12 @@ export class Bookings {
   @Column({ nullable: true })
   cancelReason?: string;
 
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
   // Relations
   @ManyToOne(() => User)
   @JoinColumn({ name: 'userId' })
@@ -58,10 +64,4 @@ export class Bookings {
   @ManyToOne(() => Events)
   @JoinColumn({ name: 'eventId' })
   event: Events;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }

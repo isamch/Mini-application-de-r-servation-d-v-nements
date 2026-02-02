@@ -6,8 +6,10 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { Bookings } from '../../bookings/entities/bookings.entity';
 
 
 /**
@@ -59,13 +61,18 @@ export class Events {
   @Column()
   createdById: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'createdById' })
-  createdBy: User;
-
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+
+  // Relations:
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'createdById' })
+  createdBy: User;
+
+  @OneToMany(() => Bookings, booking => booking.event)
+  bookings: Bookings[];
 }
