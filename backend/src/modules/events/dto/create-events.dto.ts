@@ -1,4 +1,6 @@
 import { IsString, IsNotEmpty, IsDateString, IsNumber, IsEnum, IsOptional, Min, MaxLength } from 'class-validator';
+import { Transform } from 'class-transformer';
+
 import { ApiProperty } from '@nestjs/swagger';
 import { EventStatus } from '../entities/events.entity';
 
@@ -30,7 +32,8 @@ export class CreateEventsDto {
     example: '2024-12-25'
   })
   @IsDateString()
-  date: string;
+  @Transform(({ value }) => new Date(value))
+  date: Date;
 
   @ApiProperty({
     description: 'Event start time',
@@ -62,7 +65,7 @@ export class CreateEventsDto {
     minimum: 1
   })
   @IsNumber()
-  @Min(1)
+  @Min(1, { message: 'Event capacity must be at least 1 participant' })
   maxCapacity: number;
 
   @ApiProperty({

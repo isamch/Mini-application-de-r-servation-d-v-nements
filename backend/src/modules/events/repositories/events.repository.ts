@@ -84,6 +84,21 @@ export class EventsRepository {
     });
   }
 
+
+  /**
+   * Find events by status
+   * Returns events with specific status
+   */
+  async findByStatus(status: EventStatus): Promise<Events[]> {
+    return this.repository.find({
+      where: { status },
+      relations: ['createdBy'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+
+
   /**
    * Find events occurring on a specific date
    * @param date - The target date
@@ -179,4 +194,7 @@ export class EventsRepository {
     if (!event) return 0;
     return Math.max(0, event.maxCapacity - event.currentBookings);
   }
+
+
+
 }
