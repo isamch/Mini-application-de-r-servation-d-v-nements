@@ -33,7 +33,7 @@ export class UsersRepository extends Repository<User> {
         'password', 
         'firstName', 
         'lastName', 
-        'roles', 
+        'role', 
         'isActive',
         'refreshToken',
         'isEmailVerified',

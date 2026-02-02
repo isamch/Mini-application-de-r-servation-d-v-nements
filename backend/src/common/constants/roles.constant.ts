@@ -6,8 +6,8 @@
  * Used in Guards and Decorators.
  */
 export enum UserRole {
-ADMIN = 'admin',
-USER = 'user',
+  ADMIN = 'admin',
+  PARTICIPANT = 'participant',
 }
 
 /**
