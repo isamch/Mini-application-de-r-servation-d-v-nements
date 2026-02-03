@@ -8,7 +8,8 @@ import { Bookings, BookingStatus } from '../entities/bookings.entity';
 import { UserRole } from '../../../common/constants/roles.constant';
 import { HashUtil } from '../../../common/utils/hash.util';
 import { PdfService } from './../../pdf/services/pdf.service';
-
+import { EmailService } from '../../email/services/email.service';
+import { ConfigService } from '@nestjs/config';
 
 /**
  * Bookings Service
@@ -20,6 +21,8 @@ export class BookingsService {
     private readonly bookingsRepository: BookingsRepository,
     private readonly eventsService: EventsService,
     private readonly pdfService: PdfService,
+    private readonly emailService: EmailService,
+    private readonly configService: ConfigService,
   ) { }
 
 
@@ -225,12 +228,51 @@ export class BookingsService {
     // Validate event is still available
     await this.eventsService.validateForBooking(booking.eventId);
 
-    return this.bookingsRepository.update(id, {
+    const updatedBooking = await this.bookingsRepository.update(id, {
       status: BookingStatus.CONFIRMED
     });
+
+    // Send confirmation email with download link
+    await this.sendBookingConfirmationEmail(updatedBooking);
+
+    return updatedBooking;
   }
 
 
+
+
+  /**
+   * Send booking confirmation email with download link
+   */
+  private async sendBookingConfirmationEmail(booking: Bookings): Promise<void> {
+    try {
+      const downloadToken = HashUtil.generateTicketHash(booking.id, booking.eventId, booking.userId);
+      const baseUrl = this.configService.get('app.baseUrl') || 'http://localhost:3000';
+      const downloadUrl = `${baseUrl}/api/bookings/${booking.id}/download-ticket?token=${downloadToken}`;
+
+      const emailVariables = {
+        userName: booking.user.firstName + ' ' + booking.user.lastName,
+        eventTitle: booking.event.title,
+        eventDate: new Date(booking.event.date).toLocaleDateString(),
+        eventTime: new Date(booking.event.date).toLocaleTimeString(),
+        eventLocation: booking.event.location,
+        eventDescription: booking.event.description,
+        bookingId: booking.id,
+        bookingDate: new Date(booking.createdAt).toLocaleDateString(),
+        downloadUrl,
+        currentYear: new Date().getFullYear(),
+      };
+
+      await this.emailService.sendWithTemplate(
+        booking.user.email,
+        `Booking Confirmed - ${booking.event.title}`,
+        'booking-confirmed',
+        emailVariables
+      );
+    } catch (error) {
+      console.error('Failed to send confirmation email:', error);
+    }
+  }
 
 
   /**

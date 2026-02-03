@@ -6,6 +6,8 @@ import { BookingsRepository } from './repositories/bookings.repository';
 import { Bookings } from './entities/bookings.entity';
 import { EventsModule } from '../events/events.module'; 
 import { PdfModule } from '../pdf/pdf.module';
+import { EmailModule } from '../email/email.module';
+
 
 /**
  * Bookings Module
@@ -16,6 +18,7 @@ import { PdfModule } from '../pdf/pdf.module';
     TypeOrmModule.forFeature([Bookings]),
     EventsModule,
     PdfModule,
+    EmailModule
   ],
   controllers: [BookingsController],
   providers: [BookingsService, BookingsRepository],

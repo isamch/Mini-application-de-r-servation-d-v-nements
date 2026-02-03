@@ -24,6 +24,8 @@ import { Roles } from '../../../common/decorators/roles.decorator';
 import { Public } from '../../../common/decorators/public.decorator';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { UserRole } from '../../../common/constants/roles.constant';
+import { HashUtil } from '../../../common/utils/hash.util';
+
 
 /**
  * Bookings Controller
@@ -278,6 +280,42 @@ export class BookingsController {
     res.send(pdfBuffer);
   }
 
+
+  /**
+ * Download booking ticket with token
+ */
+  @Get(':id/download-ticket')
+  @Public()
+  async downloadTicketWithToken(
+    @Param('id') id: string,
+    @Query('token') token: string,
+    @Res() res: Response
+  ): Promise<void> {
+    if (!token) {
+      throw new BadRequestException('Token is required');
+    }
+
+    const booking = await this.bookingsService.findOne(id);
+    const expectedToken = HashUtil.generateTicketHash(booking.id, booking.eventId, booking.userId);
+
+    if (token !== expectedToken) {
+      throw new BadRequestException('Invalid download token');
+    }
+
+    if (booking.status !== BookingStatus.CONFIRMED) {
+      throw new BadRequestException('Only confirmed bookings can download tickets');
+    }
+
+    const pdfBuffer = await this.bookingsService.generateTicketPdf(id, booking.userId);
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="ticket-${booking.event.title}-${id}.pdf"`,
+      'Content-Length': pdfBuffer.length,
+    });
+
+    res.send(pdfBuffer);
+  }
 
 
 
