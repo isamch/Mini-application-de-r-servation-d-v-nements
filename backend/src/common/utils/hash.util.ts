@@ -22,4 +22,15 @@ export class HashUtil {
   static async compare(password: string, hash: string): Promise<boolean> {
     return bcrypt.compare(password, hash);
   }
+
+  /**
+   * Generate verification hash for tickets
+   * Used by both PDF generation and ticket verification
+   */
+  static generateTicketHash(bookingId: string, eventId: string, userId: string): string {
+    const data = `${bookingId}-${eventId}-${userId}-${process.env.JWT_SECRET}`;
+    return Buffer.from(data).toString('base64');
+  }
+
+  
 }

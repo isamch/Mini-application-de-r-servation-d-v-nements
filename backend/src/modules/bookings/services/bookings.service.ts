@@ -6,6 +6,9 @@ import { UpdateBookingsDto } from '../dto/update-bookings.dto';
 import { QueryBookingsDto } from '../dto/query-bookings.dto';
 import { Bookings, BookingStatus } from '../entities/bookings.entity';
 import { UserRole } from '../../../common/constants/roles.constant';
+import { HashUtil } from '../../../common/utils/hash.util';
+import { PdfService } from './../../pdf/services/pdf.service';
+
 
 /**
  * Bookings Service
@@ -16,6 +19,7 @@ export class BookingsService {
   constructor(
     private readonly bookingsRepository: BookingsRepository,
     private readonly eventsService: EventsService,
+    private readonly pdfService: PdfService,
   ) { }
 
 
@@ -385,6 +389,72 @@ export class BookingsService {
     const booking = await this.validateBookingOwnership(bookingId, userId);
     return booking.status === BookingStatus.CONFIRMED;
   }
+
+
+
+  /**
+   * Generate ticket PDF for confirmed booking
+   */
+  async generateTicketPdf(bookingId: string, userId: string): Promise<Buffer> {
+    const booking = await this.validateBookingOwnership(bookingId, userId);
+
+    if (booking.status !== BookingStatus.CONFIRMED) {
+      throw new BadRequestException('Only confirmed bookings can download tickets');
+    }
+
+    return this.pdfService.generateTicket(booking);
+  }
+
+
+
+
+
+  /**
+   * Verify ticket using QR code data
+   * Validates ticket authenticity and status
+   */
+  async verifyTicket(qrData: any): Promise<{ valid: boolean; booking?: Bookings; message: string }> {
+    try {
+      const booking = await this.findOne(qrData.bookingId || qrData.id);
+
+      // Check if booking exists and is confirmed
+      if (!booking) {
+        return { valid: false, message: 'Booking not found' };
+      }
+
+      if (booking.status !== BookingStatus.CONFIRMED) {
+        return { valid: false, booking, message: 'Ticket is not confirmed' };
+      }
+
+      // Check if event date is valid
+      const eventDate = new Date(booking.event.date);
+      const today = new Date();
+
+      if (eventDate < today) {
+        return { valid: false, booking, message: 'Event has already passed' };
+      }
+
+      // Verify hash if present (security check) - استخدام HashUtil
+      if (qrData.hash) {
+        const expectedHash = HashUtil.generateTicketHash(booking.id, booking.eventId, booking.userId);
+        if (qrData.hash !== expectedHash) {
+          return { valid: false, booking, message: 'Invalid ticket - security check failed' };
+        }
+      }
+
+      return {
+        valid: true,
+        booking,
+        message: 'Valid ticket - access granted'
+      };
+
+    } catch (error) {
+      return { valid: false, message: 'Error verifying ticket' };
+    }
+  }
+
+
+
 
 
 }

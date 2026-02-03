@@ -8,8 +8,10 @@ import {
   Delete,
   Query,
   UseGuards,
-  BadRequestException
+  BadRequestException,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { BookingsService } from '../services/bookings.service';
 import { CreateBookingsDto } from '../dto/create-bookings.dto';
@@ -19,6 +21,7 @@ import { Bookings, BookingStatus } from '../entities/bookings.entity';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
+import { Public } from '../../../common/decorators/public.decorator';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { UserRole } from '../../../common/constants/roles.constant';
 
@@ -251,9 +254,9 @@ export class BookingsController {
 
 
   /**
-  * Download booking ticket
-  * Only for confirmed bookings
-  */
+   * Download booking ticket
+   * Only for confirmed bookings
+   */
   @ApiOperation({ summary: 'Download booking ticket' })
   @ApiResponse({ status: 200, description: 'Ticket downloaded successfully' })
   @ApiBearerAuth()
@@ -261,17 +264,37 @@ export class BookingsController {
   @UseGuards(JwtAuthGuard)
   async downloadTicket(
     @Param('id') id: string,
-    @CurrentUser() user: any
-  ): Promise<any> {
-    // Check eligibility first
-    const canDownload = await this.bookingsService.canDownloadTicket(id, user.id);
-    if (!canDownload) {
-      throw new BadRequestException('Ticket not available for this booking');
-    }
+    @CurrentUser() user: any,
+    @Res() res: Response
+  ): Promise<void> {
+    const pdfBuffer = await this.bookingsService.generateTicketPdf(id, user.id);
 
-    // TODO: Implement PDF generation
-    return { message: 'PDF ticket generation will be implemented here' };
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="ticket-${id}.pdf"`,
+      'Content-Length': pdfBuffer.length,
+    });
+
+    res.send(pdfBuffer);
   }
+
+
+
+
+  /**
+   * Verify ticket using QR code
+   * Public endpoint for ticket verification at events
+   */
+  @ApiOperation({ summary: 'Verify ticket QR code' })
+  @ApiResponse({ status: 200, description: 'Ticket verification result' })
+  @Post('verify-ticket')
+  @Public()
+  async verifyTicket(@Body() qrData: any): Promise<any> {
+    return this.bookingsService.verifyTicket(qrData);
+  }
+
+
+
 
 
 }
