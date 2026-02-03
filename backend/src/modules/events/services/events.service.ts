@@ -203,10 +203,17 @@ export class EventsService {
   }
 
   /**
-   * Get available spots count
-   * Returns remaining capacity
+   * Get available spots count for published events only
+   * Returns remaining capacity for public booking
    */
   async getAvailableSpots(id: string): Promise<number> {
+    const event = await this.findOne(id);
+    
+    // Only show available spots for published events
+    if (event.status !== EventStatus.PUBLISHED) {
+      throw new BadRequestException('Event is not available for booking');
+    }
+    
     return this.eventsRepository.getAvailableSpots(id);
   }
 

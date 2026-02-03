@@ -8,8 +8,8 @@ import { EventStatus } from '../entities/events.entity';
  * Data transfer object for filtering and searching events
  */
 export class QueryEventsDto {
-  @ApiProperty({ 
-    description: 'Filter by event status', 
+  @ApiProperty({
+    description: 'Filter by event status',
     enum: EventStatus,
     example: EventStatus.PUBLISHED,
     required: false
@@ -18,8 +18,8 @@ export class QueryEventsDto {
   @IsEnum(EventStatus)
   status?: EventStatus;
 
-  @ApiProperty({ 
-    description: 'Filter by specific date', 
+  @ApiProperty({
+    description: 'Filter by specific date',
     example: '2024-12-25',
     required: false
   })
@@ -27,8 +27,8 @@ export class QueryEventsDto {
   @IsDateString()
   date?: string;
 
-  @ApiProperty({ 
-    description: 'Filter by event creator', 
+  @ApiProperty({
+    description: 'Filter by event creator',
     example: 'uuid-user-id',
     required: false
   })
@@ -36,8 +36,8 @@ export class QueryEventsDto {
   @IsString()
   createdById?: string;
 
-  @ApiProperty({ 
-    description: 'Search in title and description', 
+  @ApiProperty({
+    description: 'Search in title and description',
     example: 'workshop',
     required: false
   })
@@ -45,8 +45,8 @@ export class QueryEventsDto {
   @IsString()
   search?: string;
 
-  @ApiProperty({ 
-    description: 'Filter by location', 
+  @ApiProperty({
+    description: 'Filter by location',
     example: 'conference room',
     required: false
   })
@@ -54,8 +54,8 @@ export class QueryEventsDto {
   @IsString()
   location?: string;
 
-  @ApiProperty({ 
-    description: 'Show only events with available spots', 
+  @ApiProperty({
+    description: 'Show only events with available spots',
     example: true,
     required: false
   })
@@ -64,8 +64,8 @@ export class QueryEventsDto {
   @IsBoolean()
   available?: boolean;
 
-  @ApiProperty({ 
-    description: 'Start date for date range filter', 
+  @ApiProperty({
+    description: 'Start date for date range filter',
     example: '2024-12-01',
     required: false
   })
@@ -73,8 +73,8 @@ export class QueryEventsDto {
   @IsDateString()
   startDate?: string;
 
-  @ApiProperty({ 
-    description: 'End date for date range filter', 
+  @ApiProperty({
+    description: 'End date for date range filter',
     example: '2024-12-31',
     required: false
   })

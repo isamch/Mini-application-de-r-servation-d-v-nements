@@ -27,30 +27,30 @@ import { UsersService } from '@/modules/users/services/users.service';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private usersService: UsersService) {
-  super({
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    ignoreExpiration: false,
-    secretOrKey: process.env.JWT_SECRET || 'your-secret-key',
-});
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: process.env.JWT_SECRET || 'isam-secret-key',
+    });
   }
 
-/**
-* Validate JWT payload
-*
-* @param payload - Decoded JWT payload
-* @returns User object (attached to request)
-* @throws UnauthorizedException if user not found
-*/
+  /**
+  * Validate JWT payload
+  *
+  * @param payload - Decoded JWT payload
+  * @returns User object (attached to request)
+  * @throws UnauthorizedException if user not found
+  */
   async validate(payload: any) {
     const user = await this.usersService.findOne(payload.sub);
 
-  if (!user) {
-    throw new UnauthorizedException('User not found');
-  }
-  if (!user.isActive) {
-    throw new UnauthorizedException('User account is inactive');
-  }
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    if (!user.isActive) {
+      throw new UnauthorizedException('User account is inactive');
+    }
 
     return user;
-}
+  }
 }

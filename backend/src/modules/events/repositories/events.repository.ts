@@ -98,7 +98,6 @@ export class EventsRepository {
   }
 
 
-
   /**
    * Find events occurring on a specific date
    * @param date - The target date
