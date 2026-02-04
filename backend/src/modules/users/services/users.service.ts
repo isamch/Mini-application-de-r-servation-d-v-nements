@@ -204,7 +204,9 @@ export class UsersService {
       // Users permissions
       UserPermissions.CREATE_USER,
       UserPermissions.READ_ALL_USERS,
+      UserPermissions.READ_USER,
       UserPermissions.UPDATE_USER,
+      UserPermissions.UPDATE_OWN_USER,
       UserPermissions.DELETE_USER,
     ];
   }
@@ -234,10 +236,12 @@ export class UsersService {
    * Returns appropriate permissions array for the role
    */
   generatePermissionsByRole(role: string): string[] {
-    switch (role) {
+    const normalizedRole = role?.toUpperCase();
+    switch (normalizedRole) {
       case 'ADMIN':
         return this.generateAdminPermissions();
       case 'PARTICIPANT':
+      case 'USER':
       default:
         return this.generateUserPermissions();
     }
