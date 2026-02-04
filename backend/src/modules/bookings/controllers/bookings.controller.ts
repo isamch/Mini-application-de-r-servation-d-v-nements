@@ -299,6 +299,8 @@ export class BookingsController {
   /**
    * Download booking ticket with token
    */
+  @ApiOperation({ summary: 'Download booking ticket with token' })
+  @ApiResponse({ status: 200, description: 'Ticket downloaded successfully' })
   @Get(':id/download-ticket')
   @Public()
   async downloadTicketWithToken(
