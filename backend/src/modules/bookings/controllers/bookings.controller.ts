@@ -24,7 +24,9 @@ import { Roles } from '../../../common/decorators/roles.decorator';
 import { Public } from '../../../common/decorators/public.decorator';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { UserRole } from '../../../common/constants/roles.constant';
-import { HashUtil } from '../../../common/utils/hash.util';
+import { PermissionsGuard } from '../../../common/guards/permissions.guard';
+import { RequirePermissions } from '../../../common/decorators/require-permissions.decorator';
+import { BookingsPermissions } from '../permissions/bookings.permissions';
 
 
 /**
@@ -47,7 +49,8 @@ export class BookingsController {
   @ApiResponse({ status: 201, description: 'Booking created successfully', type: Bookings })
   @ApiBearerAuth()
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermissions(BookingsPermissions.CREATE_BOOKINGS)
   create(
     @Body() createBookingsDto: CreateBookingsDto,
     @CurrentUser() user: any
@@ -67,8 +70,9 @@ export class BookingsController {
   @ApiResponse({ status: 200, description: 'Bookings retrieved successfully', type: [Bookings] })
   @ApiBearerAuth()
   @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Roles(UserRole.ADMIN)
+  @RequirePermissions(BookingsPermissions.VIEW_ALL_BOOKINGS)
   findAll(@Query() queryDto: QueryBookingsDto): Promise<Bookings[]> {
     return this.bookingsService.findAll(queryDto);
   }
@@ -83,7 +87,8 @@ export class BookingsController {
   @ApiResponse({ status: 200, description: 'User bookings retrieved', type: [Bookings] })
   @ApiBearerAuth()
   @Get('my')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermissions(BookingsPermissions.READ_BOOKINGS)
   findMyBookings(@CurrentUser() user: any): Promise<Bookings[]> {
     return this.bookingsService.findMyBookings(user.id);
   }
@@ -100,8 +105,9 @@ export class BookingsController {
   @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
   @ApiBearerAuth()
   @Get('stats')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Roles(UserRole.ADMIN)
+  @RequirePermissions(BookingsPermissions.MANAGE_BOOKINGS)
   getBookingStats(@Query('eventId') eventId?: string): Promise<any> {
     return this.bookingsService.getBookingStats(eventId);
   }
@@ -115,8 +121,9 @@ export class BookingsController {
   @ApiResponse({ status: 200, description: 'Event bookings retrieved', type: [Bookings] })
   @ApiBearerAuth()
   @Get('event/:eventId')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Roles(UserRole.ADMIN)
+  @RequirePermissions(BookingsPermissions.VIEW_ALL_BOOKINGS)
   findByEvent(@Param('eventId') eventId: string): Promise<Bookings[]> {
     return this.bookingsService.findByEvent(eventId);
   }
@@ -132,7 +139,8 @@ export class BookingsController {
   @ApiResponse({ status: 404, description: 'Booking not found' })
   @ApiBearerAuth()
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermissions(BookingsPermissions.READ_BOOKINGS)
   findOne(@Param('id') id: string): Promise<Bookings> {
     return this.bookingsService.findOne(id);
   }
@@ -147,7 +155,8 @@ export class BookingsController {
   @ApiResponse({ status: 200, description: 'Booking notes updated', type: Bookings })
   @ApiBearerAuth()
   @Patch(':id/notes')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermissions(BookingsPermissions.UPDATE_BOOKINGS)
   updateMyBooking(
     @Param('id') id: string,
     @Body('notes') notes: string,
@@ -165,7 +174,8 @@ export class BookingsController {
   @ApiResponse({ status: 200, description: 'Booking canceled successfully', type: Bookings })
   @ApiBearerAuth()
   @Patch(':id/cancel')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermissions(BookingsPermissions.UPDATE_BOOKINGS)
   cancelMyBooking(
     @Param('id') id: string,
     @Body('cancelReason') cancelReason: string,
@@ -183,8 +193,9 @@ export class BookingsController {
   @ApiResponse({ status: 200, description: 'Booking confirmed successfully', type: Bookings })
   @ApiBearerAuth()
   @Patch(':id/confirm')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Roles(UserRole.ADMIN)
+  @RequirePermissions(BookingsPermissions.CONFIRM_BOOKINGS)
   confirmBooking(
     @Param('id') id: string,
     @CurrentUser() user: any
@@ -203,8 +214,9 @@ export class BookingsController {
   @ApiResponse({ status: 200, description: 'Booking refused successfully', type: Bookings })
   @ApiBearerAuth()
   @Patch(':id/refuse')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Roles(UserRole.ADMIN)
+  @RequirePermissions(BookingsPermissions.REFUSE_BOOKINGS)
   refuseBooking(
     @Param('id') id: string,
     @Body('refuseReason') refuseReason: string,
@@ -224,8 +236,9 @@ export class BookingsController {
   @ApiResponse({ status: 200, description: 'Booking canceled successfully', type: Bookings })
   @ApiBearerAuth()
   @Patch(':id/admin-cancel')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Roles(UserRole.ADMIN)
+  @RequirePermissions(BookingsPermissions.DELETE_BOOKINGS)
   cancelBooking(
     @Param('id') id: string,
     @Body('cancelReason') cancelReason: string,
@@ -244,7 +257,8 @@ export class BookingsController {
   @ApiResponse({ status: 200, description: 'Ticket eligibility status' })
   @ApiBearerAuth()
   @Get(':id/ticket-eligibility')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermissions(BookingsPermissions.READ_BOOKINGS)
   async checkTicketEligibility(
     @Param('id') id: string,
     @CurrentUser() user: any
@@ -263,7 +277,8 @@ export class BookingsController {
   @ApiResponse({ status: 200, description: 'Ticket downloaded successfully' })
   @ApiBearerAuth()
   @Get(':id/ticket')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermissions(BookingsPermissions.READ_BOOKINGS)
   async downloadTicket(
     @Param('id') id: string,
     @CurrentUser() user: any,
