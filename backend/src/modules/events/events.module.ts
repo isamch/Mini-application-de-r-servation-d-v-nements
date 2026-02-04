@@ -1,10 +1,11 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventsController } from './controllers/events.controller';
 import { EventsService } from './services/events.service';
 import { EventsRepository } from './repositories/events.repository';
 import { Events } from './entities/events.entity';
-// import { BookingsModule } from '../bookings/bookings.module';
+import { EventsAuditMiddleware } from './middlewares/events-audit.middleware';
+import { AuditModule } from '../audit/audit.module';
 
 /**
  * Events Module
@@ -13,9 +14,16 @@ import { Events } from './entities/events.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Events]),
+    AuditModule,
   ],
   controllers: [EventsController],
-  providers: [EventsService, EventsRepository],
+  providers: [EventsService, EventsRepository, EventsAuditMiddleware],
   exports: [EventsService, EventsRepository],
 })
-export class EventsModule { }
+export class EventsModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(EventsAuditMiddleware)
+      .forRoutes(EventsController);
+  }
+}

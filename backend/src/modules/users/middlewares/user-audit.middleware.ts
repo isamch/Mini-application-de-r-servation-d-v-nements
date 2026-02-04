@@ -1,5 +1,6 @@
 import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
+import { AuditService } from '../../audit/services/audit.service';
 
 /**
 * User Audit Middleware
@@ -34,31 +35,34 @@ import { Request, Response, NextFunction } from 'express';
 */
 @Injectable()
 export class UserAuditMiddleware implements NestMiddleware {
+  constructor(private readonly auditService: AuditService) { }
+
   private readonly logger = new Logger('UserAudit');
 
-  use(req: Request, res: Response, next: NextFunction) {
+  async use(req: Request, res: Response, next: NextFunction) {
     const { method, url, user, params, body } = req as any;
-    const timestamp = new Date().toISOString();
 
-    // Log user modifications
     if (method === 'PATCH' || method === 'DELETE' || method === 'POST') {
-      const action = method === 'PATCH' ? 'UPDATED' : method === 'DELETE' ? 'DELETED' : 'CREATED';
+      const action = method === 'PATCH' ? 'UPDATE_USER' : method === 'DELETE' ? 'DELETE_USER' : 'CREATE_USER';
       const targetUserId = params.id || 'new';
       const actor = user?.email || 'anonymous';
 
-      this.logger.log(
-        `[AUDIT] User ${actor} ${action} user ${targetUserId} at ${timestamp}`,
-      );
+      this.logger.log(`[AUDIT] User ${actor} ${action} user ${targetUserId}`);
 
-      // You can also save to database here
-      // await this.auditService.create({
-      // actor: user?.id,
-      // action,
-      // resource: 'user',
-      // resourceId: targetUserId,
-      // timestamp,
-      // changes: body,
-      // });
+      try {
+        await this.auditService.create({
+          userId: user?.id || null,
+          action: action,
+          resource: 'USER',
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent') || '',
+          changes: JSON.stringify(body || {}),
+          method: method,
+          url: req.originalUrl || req.url
+        });
+      } catch (error) {
+        this.logger.error('Failed to create audit log:', error);
+      }
     }
 
     next();

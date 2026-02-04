@@ -4,7 +4,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeor
  * AuditLog Entity
  * Database model for audit_logs table
  */
-@Entity('audit_logs')
+@Entity('audit')
 export class Audit {
   @PrimaryGeneratedColumn('uuid')
   id: string;

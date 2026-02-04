@@ -8,6 +8,7 @@ import { EmailModule } from './modules/email/email.module';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { EventsModule } from './modules/events/events.module';
 import { BookingsModule } from './modules/bookings/bookings.module';
+import { AuditModule } from './modules/audit/audit.module';
 
 
 @Module({
@@ -24,6 +25,7 @@ import { BookingsModule } from './modules/bookings/bookings.module';
     EmailModule,
     EventsModule,
     BookingsModule,
+    AuditModule,
   ],
   controllers: [],
   providers: [],
