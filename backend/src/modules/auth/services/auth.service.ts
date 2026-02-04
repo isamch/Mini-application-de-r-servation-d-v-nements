@@ -58,7 +58,15 @@ export class AuthService {
 
     await this.usersService.ensureUserPermissions(user);
 
-    return this.generateTokens(user.id, user.email);
+    const tokens = await this.generateTokens(user.id, user.email);
+    
+    // Return tokens with user data (excluding sensitive fields)
+    const { password, refreshToken, emailVerificationToken, passwordResetToken, ...userWithoutSensitiveData } = user;
+    
+    return {
+      ...tokens,
+      user: userWithoutSensitiveData
+    };
   }
 
   /**

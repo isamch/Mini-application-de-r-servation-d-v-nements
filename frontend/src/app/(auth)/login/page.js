@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 import { useForm } from 'react-hook-form';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -13,20 +14,25 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState(false);
   const { login } = useAuth();
+  const toast = useToast();
   const router = useRouter();
   
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, formState: { errors }, watch } = useForm({
+    onChange: () => setLoginError(false)
+  });
 
   const onSubmit = async (data) => {
     setIsLoading(true);
     setLoginError(false);
     try {
       await login(data.email, data.password);
-      router.push('/dashboard');
+      toast.success('Login successful! Welcome back.');
+      router.replace('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
+      const message = error.response?.data?.message || 'Login failed. Please check your credentials.';
+      toast.error(Array.isArray(message) ? message[0] : message);
       setLoginError(true);
-      // Error is already handled by AuthContext with toast
     } finally {
       setIsLoading(false);
     }
@@ -95,12 +101,14 @@ export default function LoginPage() {
                     pattern: {
                       value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                       message: 'Invalid email address'
-                    }
+                    },
+                    onChange: () => setLoginError(false)
                   })}
                   type="email"
                   placeholder="Enter your email"
                   className={`pl-4 pr-4 py-3 bg-gray-50/50 border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 group-hover:border-indigo-300 ${loginError ? 'animate-shake' : ''}`}
                   error={errors.email?.message || (loginError ? 'Invalid credentials' : null)}
+                  onFocus={() => setLoginError(false)}
                 />
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-10 transition-opacity duration-200 pointer-events-none"></div>
               </div>
@@ -113,12 +121,14 @@ export default function LoginPage() {
                       minLength: {
                         value: 6,
                         message: 'Password must be at least 6 characters'
-                      }
+                      },
+                      onChange: () => setLoginError(false)
                     })}
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your password"
                     className={`pl-4 pr-12 py-3 bg-gray-50/50 border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 group-hover:border-indigo-300 ${loginError ? 'animate-shake' : ''}`}
                     error={errors.password?.message || (loginError ? 'Invalid credentials' : null)}
+                    onFocus={() => setLoginError(false)}
                   />
                   <button
                     type="button"

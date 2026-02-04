@@ -9,7 +9,7 @@ export default function AuthLayout({ children }) {
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      router.push('/dashboard');
+      router.replace('/dashboard');
     }
   }, [isAuthenticated, loading, router]);
 
@@ -21,9 +21,6 @@ export default function AuthLayout({ children }) {
     );
   }
 
-  if (isAuthenticated) {
-    return null;
-  }
-
+  // Allow rendering children even if authenticated (for smooth transition)
   return <>{children}</>;
 }

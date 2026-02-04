@@ -13,8 +13,11 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
+    // Don't add token for auth endpoints (login, register, etc.)
+    const isAuthEndpoint = config.url?.includes('/auth/');
     const token = Cookies.get('token');
-    if (token) {
+    
+    if (token && !isAuthEndpoint) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;

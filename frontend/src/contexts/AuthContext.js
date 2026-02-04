@@ -2,7 +2,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import api from '@/lib/api';
-import { useToast } from '@/contexts/ToastContext';
 
 const AuthContext = createContext();
 
@@ -17,15 +16,15 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const toast = useToast();
 
   useEffect(() => {
     const token = Cookies.get('token');
     const userData = Cookies.get('user');
 
-    if (token && userData) {
+    if (token && userData && userData !== 'undefined') {
       try {
-        setUser(JSON.parse(userData));
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
       } catch (error) {
         console.error('Error parsing user data:', error);
         Cookies.remove('token');
@@ -44,11 +43,8 @@ export const AuthProvider = ({ children }) => {
       Cookies.set('user', JSON.stringify(userData), { expires: 7 });
       setUser(userData);
 
-      toast.success('Login successful! Welcome back.');
       return userData;
     } catch (error) {
-      const message = error.response?.data?.message || 'Login failed. Please check your credentials.';
-      toast.error(Array.isArray(message) ? message[0] : message);
       throw error;
     }
   };
@@ -56,11 +52,8 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await api.post('/auth/register', userData);
-      toast.success('Account created successfully! Please sign in.');
       return response.data.data;
     } catch (error) {
-      const message = error.response?.data?.message || 'Registration failed';
-      toast.error(Array.isArray(message) ? message[0] : message);
       throw error;
     }
   };
@@ -74,7 +67,6 @@ export const AuthProvider = ({ children }) => {
       Cookies.remove('token');
       Cookies.remove('user');
       setUser(null);
-      toast.success('Logged out successfully. See you soon!');
     }
   };
 
