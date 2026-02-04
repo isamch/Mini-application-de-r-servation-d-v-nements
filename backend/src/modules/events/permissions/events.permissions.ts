@@ -3,16 +3,15 @@
  * Defines all available permissions for events module
  */
 export enum EventsPermissions {
-  // Basic CRUD permissions
+  MANAGE_EVENTS = 'manage:events',
   CREATE_EVENTS = 'create:events',
   READ_EVENTS = 'read:events',
   UPDATE_EVENTS = 'update:events',
   DELETE_EVENTS = 'delete:events',
-  
-  // Advanced permissions
-  MANAGE_EVENTS = 'manage:events',
   VIEW_ALL_EVENTS = 'view-all:events',
+  PUBLISH_EVENTS = 'publish:events',
 }
+
 
 /**
  * Get all events permissions

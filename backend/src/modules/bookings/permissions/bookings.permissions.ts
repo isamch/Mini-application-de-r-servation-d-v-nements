@@ -3,16 +3,16 @@
  * Defines all available permissions for bookings module
  */
 export enum BookingsPermissions {
-  // Basic CRUD permissions
+  MANAGE_BOOKINGS = 'manage:bookings',
   CREATE_BOOKINGS = 'create:bookings',
   READ_BOOKINGS = 'read:bookings',
   UPDATE_BOOKINGS = 'update:bookings',
   DELETE_BOOKINGS = 'delete:bookings',
-  
-  // Advanced permissions
-  MANAGE_BOOKINGS = 'manage:bookings',
   VIEW_ALL_BOOKINGS = 'view-all:bookings',
+  CONFIRM_BOOKINGS = 'confirm:bookings',
+  REFUSE_BOOKINGS = 'refuse:bookings',
 }
+
 
 /**
  * Get all bookings permissions

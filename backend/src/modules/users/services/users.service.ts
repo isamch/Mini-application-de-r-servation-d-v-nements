@@ -4,6 +4,9 @@ import { CreateUserDto } from '@/modules/users/dto/create-user.dto';
 import { UpdateUserDto } from '@/modules/users/dto/update-user.dto';
 import { User } from '@/modules/users/entities/user.entity';
 import { HashUtil } from '@/common/utils/hash.util';
+import { EventsPermissions } from '@/modules/events/permissions/events.permissions';
+import { BookingsPermissions } from '@/modules/bookings/permissions/bookings.permissions';
+import { UserPermissions } from '@/modules/users/permissions/user.permissions';
 
 /**
  * Users Service
@@ -180,29 +183,29 @@ export class UsersService {
   generateAdminPermissions(): string[] {
     return [
       // Events permissions
-      'manage:events',
-      'create:events',
-      'read:events',
-      'update:events',
-      'delete:events',
-      'view-all:events',
-      'publish:events',
+      EventsPermissions.MANAGE_EVENTS,
+      EventsPermissions.CREATE_EVENTS,
+      EventsPermissions.READ_EVENTS,
+      EventsPermissions.UPDATE_EVENTS,
+      EventsPermissions.DELETE_EVENTS,
+      EventsPermissions.VIEW_ALL_EVENTS,
+      EventsPermissions.PUBLISH_EVENTS,
 
       // Bookings permissions
-      'manage:bookings',
-      'create:bookings',
-      'read:bookings',
-      'update:bookings',
-      'delete:bookings',
-      'view-all:bookings',
-      'confirm:bookings',
-      'refuse:bookings',
+      BookingsPermissions.MANAGE_BOOKINGS,
+      BookingsPermissions.CREATE_BOOKINGS,
+      BookingsPermissions.READ_BOOKINGS,
+      BookingsPermissions.UPDATE_BOOKINGS,
+      BookingsPermissions.DELETE_BOOKINGS,
+      BookingsPermissions.VIEW_ALL_BOOKINGS,
+      BookingsPermissions.CONFIRM_BOOKINGS,
+      BookingsPermissions.REFUSE_BOOKINGS,
 
       // Users permissions
-      'create:user',
-      'read:all_users',
-      'update:user',
-      'delete:user'
+      UserPermissions.CREATE_USER,
+      UserPermissions.READ_ALL_USERS,
+      UserPermissions.UPDATE_USER,
+      UserPermissions.DELETE_USER,
     ];
   }
 
@@ -213,16 +216,16 @@ export class UsersService {
   generateUserPermissions(): string[] {
     return [
       // Basic booking permissions
-      'create:bookings',
-      'read:bookings',
-      'update:bookings',
+      BookingsPermissions.CREATE_BOOKINGS,
+      BookingsPermissions.READ_BOOKINGS,
+      BookingsPermissions.UPDATE_BOOKINGS,
 
       // Basic events permissions
-      'read:events',
+      EventsPermissions.READ_EVENTS,
 
       // Own profile permissions
-      'update:own_user',
-      'read:user'
+      UserPermissions.UPDATE_OWN_USER,
+      UserPermissions.READ_USER,
     ];
   }
 

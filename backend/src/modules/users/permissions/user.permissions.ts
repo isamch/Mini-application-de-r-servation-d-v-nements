@@ -21,20 +21,12 @@
   * ```
   */
 export enum UserPermissions {
-  // Read permissions
-  READ_USER = 'read:user',
-  READ_ALL_USERS = 'read:all_users',
-
-  // Write permissions
   CREATE_USER = 'create:user',
+  READ_ALL_USERS = 'read:all_users',
+  READ_USER = 'read:user',
   UPDATE_USER = 'update:user',
   UPDATE_OWN_USER = 'update:own_user',
-
-  // Delete permissions
   DELETE_USER = 'delete:user',
-  DELETE_OWN_USER = 'delete:own_user',
-
-  // TODO: Add more permissions as needed
 }
 
 /**
