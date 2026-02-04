@@ -29,12 +29,24 @@ export class AuthService {
 
   /**
    * Register new user account
-   * Creates user, sends verification email, and returns tokens
+   * Creates user and automatically verifies email
    */
   async register(registerDto: RegisterDto) {
-    const user = await this.usersService.create(registerDto);
-    await this.sendVerificationEmail(user);
-    return this.generateTokens(user.id, user.email);
+    // Auto-validate user by setting isEmailVerified to true
+    const userWithValidation = {
+      ...registerDto,
+      isEmailVerified: true
+    };
+    
+    const user = await this.usersService.create(userWithValidation);
+    
+    // Return user data (excluding sensitive fields) without tokens
+    const { password, refreshToken, emailVerificationToken, passwordResetToken, ...userWithoutSensitiveData } = user;
+    
+    return {
+      user: userWithoutSensitiveData,
+      message: 'Registration successful'
+    };
   }
 
   /**

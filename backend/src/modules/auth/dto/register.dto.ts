@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, Matches } from 'class-validator';
+import { IsEmail, IsString, MinLength, Matches, IsOptional } from 'class-validator';
 import { REGEX_PATTERNS } from '@/common/constants';
 
 /**
@@ -13,6 +13,7 @@ import { REGEX_PATTERNS } from '@/common/constants';
  * - password: Minimum 8 characters, uppercase, lowercase, number
  * - firstName: Required string
  * - lastName: Required string
+ * - phone: Optional string
  *
  * @example
  * ```typescript
@@ -20,7 +21,8 @@ import { REGEX_PATTERNS } from '@/common/constants';
  *   email: 'john@example.com',
  *   password: 'Password123',
  *   firstName: 'John',
- *   lastName: 'Doe'
+ *   lastName: 'Doe',
+ *   phone: '+1234567890'
  * };
  * ```
  */
@@ -40,4 +42,8 @@ export class RegisterDto {
 
   @IsString()
   lastName: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
 }

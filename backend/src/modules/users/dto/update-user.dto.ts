@@ -1,55 +1,38 @@
-import { IsEmail, IsString, IsOptional, IsBoolean, IsArray } from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateUserDto } from './create-user.dto';
+import { IsOptional, IsString, IsDate } from 'class-validator';
 
 /**
 * Update User DTO
 *
 * @description
 * Data Transfer Object for updating an existing user.
-* All fields are optional - only provided fields will be updated.
-*
-* @validation
-* - email: Must be valid email format (if provided)
-* - firstName: Must be string (if provided)
-* - lastName: Must be string (if provided)
-* - password: Must be string (if provided)
-* - roles: Must be array of strings (if provided)
-* - isActive: Must be boolean (if provided)
-*
-* @security
-* - Password updates should use a separate endpoint
-* - This DTO includes password field for service compatibility
+* Extends CreateUserDto with all fields as optional plus additional update-specific fields.
 *
 * @example
 * ```typescript
 * const updateUserDto: UpdateUserDto = {
-* firstName: 'Jane',
-* isActive: false
+*   firstName: 'Jane',
+*   phone: '+1234567890',
+*   isActive: false,
+*   refreshToken: 'new-token'
 * };
 * ```
 */
-export class UpdateUserDto {
+export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsOptional()
-  @IsEmail()
-  email?: string;
+  @IsString()
+  refreshToken?: string;
 
   @IsOptional()
   @IsString()
-  firstName?: string;
+  emailVerificationToken?: string;
 
   @IsOptional()
   @IsString()
-  lastName?: string;
+  passwordResetToken?: string;
 
   @IsOptional()
-  @IsString()
-  password?: string;
-
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  roles?: string[];
-
-  @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
+  @IsDate()
+  passwordResetExpires?: Date;
 }

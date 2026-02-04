@@ -27,7 +27,15 @@ export default function RegisterPage() {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      await registerUser(data);
+      // Send fields accepted by RegisterDto including optional phone
+      const registrationData = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        password: data.password,
+        ...(data.phone && { phone: data.phone }) // Include phone if provided
+      };
+      await registerUser(registrationData);
       setCurrentStep(3);
       setTimeout(() => {
         router.push('/login');
@@ -196,8 +204,8 @@ export default function RegisterPage() {
                           message: 'Password must be at least 8 characters'
                         },
                         pattern: {
-                          value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-                          message: 'Password must contain uppercase, lowercase, and number'
+                          value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/,
+                          message: 'Password must contain at least 8 characters, one uppercase, one lowercase, and one number'
                         }
                       })}
                       type={showPassword ? 'text' : 'password'}

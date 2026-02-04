@@ -84,7 +84,8 @@ export class EmailService {
    */
   loadTemplate(templateName: string): string {
     try {
-      const templatePath = path.join(__dirname, '../templates', `${templateName}.html`);
+      // Use process.cwd() to get the project root and look in src folder
+      const templatePath = path.join(process.cwd(), 'src', 'modules', 'email', 'templates', `${templateName}.html`);
       return fs.readFileSync(templatePath, 'utf-8');
     } catch (error) {
       this.logger.error(`Template ${templateName} not found:`, error);
