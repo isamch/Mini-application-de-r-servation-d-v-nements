@@ -496,7 +496,43 @@ export class BookingsService {
   }
 
 
+  /**
+   *  validate download ticket with token 
+   *  Generates ticket PDF with token validation
+   */
+  async validateAndGenerateTicketWithToken(
+    bookingId: string,
+    token: string
+  ): Promise<{ booking: Bookings, pdfBuffer: Buffer }> {
+    // 1. verify token existence
+    if (!token) {
+      throw new BadRequestException('Token is required');
+    }
 
+    // 2. get booking details
+    const booking = await this.findOne(bookingId);
+
+    // 3. verify token validity
+    const expectedToken = HashUtil.generateTicketHash(
+      booking.id,
+      booking.eventId,
+      booking.userId
+    );
+
+    if (token !== expectedToken) {
+      throw new BadRequestException('Invalid download token');
+    }
+
+    // 4. verify booking status
+    if (booking.status !== BookingStatus.CONFIRMED) {
+      throw new BadRequestException('Only confirmed bookings can download tickets');
+    }
+
+    // 5. create PDF
+    const pdfBuffer = await this.generateTicketPdf(bookingId, booking.userId);
+
+    return { booking, pdfBuffer };
+  }
 
 
 }

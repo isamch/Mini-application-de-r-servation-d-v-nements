@@ -1,0 +1,648 @@
+{
+  "info": {
+    "name": "Event Booking System API",
+    "description": "Complete API collection for Event Booking System with all endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminEmail",
+      "value": "ahmed.admin@eventbooking.com",
+      "type": "string"
+    },
+    {
+      "key": "adminPassword",
+      "value": "Admin123!",
+      "type": "string"
+    },
+    {
+      "key": "userEmail",
+      "value": "mohammed.ali@gmail.com",
+      "type": "string"
+    },
+    {
+      "key": "userPassword",
+      "value": "User123!",
+      "type": "string"
+    },
+    {
+      "key": "eventId",
+      "value": "event-001",
+      "type": "string"
+    },
+    {
+      "key": "bookingId",
+      "value": "booking-001",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "user-001",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Create Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{eventId}}\",\n  \"notes\": \"Looking forward to this event!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings"]
+            }
+          }
+        },
+        {
+          "name": "Get All Bookings (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bookings?status=PENDING&eventId={{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDING"
+                },
+                {
+                  "key": "eventId",
+                  "value": "{{eventId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get My Bookings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/my",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "my"]
+            }
+          }
+        },
+        {
+          "name": "Get Booking Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/stats?eventId={{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "stats"],
+              "query": [
+                {
+                  "key": "eventId",
+                  "value": "{{eventId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Bookings for Event",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/event/{{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "event", "{{eventId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Booking by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/{{bookingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "{{bookingId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Booking Notes",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Updated notes for my booking\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bookings/booking-uuid-123/notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "booking-uuid-123", "notes"]
+            }
+          }
+        },
+        {
+          "name": "Cancel My Booking",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cancelReason\": \"Personal reasons - cannot attend\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bookings/booking-uuid-123/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "booking-uuid-123", "cancel"]
+            }
+          }
+        },
+        {
+          "name": "Confirm Booking (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/booking-uuid-123/confirm",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "booking-uuid-123", "confirm"]
+            }
+          }
+        },
+        {
+          "name": "Refuse Booking (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refuseReason\": \"Event is full - no more capacity\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bookings/booking-uuid-123/refuse",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "booking-uuid-123", "refuse"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Booking (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cancelReason\": \"Event cancelled due to weather conditions\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bookings/booking-uuid-123/admin-cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "booking-uuid-123", "admin-cancel"]
+            }
+          }
+        },
+        {
+          "name": "Check Ticket Eligibility",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/booking-uuid-123/ticket-eligibility",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "booking-uuid-123", "ticket-eligibility"]
+            }
+          }
+        },
+        {
+          "name": "Download Ticket (Authenticated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/booking-uuid-123/ticket",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "booking-uuid-123", "ticket"]
+            }
+          }
+        },
+        {
+          "name": "Download Ticket with Token (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/booking-uuid-123/download-ticket?token=secure-hash-token-123",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "booking-uuid-123", "download-ticket"],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "secure-hash-token-123"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Verify Ticket QR Code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingId\": \"booking-uuid-123\",\n  \"eventId\": \"event-uuid-123\",\n  \"userId\": \"user-uuid-123\",\n  \"hash\": \"verification-hash-123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bookings/verify-ticket",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "verify-ticket"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"+1234567890\",\n  \"role\": \"PARTICIPANT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "Create Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Tech Conference 2024\",\n  \"description\": \"Annual technology conference with latest trends\",\n  \"date\": \"2024-06-15T10:00:00Z\",\n  \"location\": \"Convention Center, Downtown\",\n  \"capacity\": 500,\n  \"price\": 99.99,\n  \"category\": \"TECHNOLOGY\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": ["{{baseUrl}}"],
+              "path": ["events"]
+            }
+          }
+        },
+        {
+          "name": "Get All Events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/events?status=ACTIVE&category=TECHNOLOGY",
+              "host": ["{{baseUrl}}"],
+              "path": ["events"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                },
+                {
+                  "key": "category",
+                  "value": "TECHNOLOGY"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Event by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/events/event-uuid-123",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "event-uuid-123"]
+            }
+          }
+        },
+        {
+          "name": "Update Event",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Tech Conference 2024\",\n  \"description\": \"Updated description with new speakers\",\n  \"capacity\": 600\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events/event-uuid-123",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "event-uuid-123"]
+            }
+          }
+        },
+        {
+          "name": "Delete Event",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/events/event-uuid-123",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "event-uuid-123"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users?role=PARTICIPANT",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "PARTICIPANT"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John Updated\",\n  \"lastName\": \"Doe Updated\",\n  \"phone\": \"+1234567891\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/user-uuid-123",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "user-uuid-123"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

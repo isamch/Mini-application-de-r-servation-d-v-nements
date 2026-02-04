@@ -282,8 +282,8 @@ export class BookingsController {
 
 
   /**
- * Download booking ticket with token
- */
+   * Download booking ticket with token
+   */
   @Get(':id/download-ticket')
   @Public()
   async downloadTicketWithToken(
@@ -291,23 +291,11 @@ export class BookingsController {
     @Query('token') token: string,
     @Res() res: Response
   ): Promise<void> {
-    if (!token) {
-      throw new BadRequestException('Token is required');
-    }
+    // call service to validate token and generate ticket
+    const { booking, pdfBuffer } = await this.bookingsService
+      .validateAndGenerateTicketWithToken(id, token);
 
-    const booking = await this.bookingsService.findOne(id);
-    const expectedToken = HashUtil.generateTicketHash(booking.id, booking.eventId, booking.userId);
-
-    if (token !== expectedToken) {
-      throw new BadRequestException('Invalid download token');
-    }
-
-    if (booking.status !== BookingStatus.CONFIRMED) {
-      throw new BadRequestException('Only confirmed bookings can download tickets');
-    }
-
-    const pdfBuffer = await this.bookingsService.generateTicketPdf(id, booking.userId);
-
+    // Set response headers for PDF download
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="ticket-${booking.event.title}-${id}.pdf"`,
