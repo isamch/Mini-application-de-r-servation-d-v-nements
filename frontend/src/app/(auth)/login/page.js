@@ -11,6 +11,7 @@ import { Eye, EyeOff, Calendar, Users, Sparkles } from 'lucide-react';
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
   
@@ -18,14 +19,22 @@ export default function LoginPage() {
 
   const onSubmit = async (data) => {
     setIsLoading(true);
+    setLoginError(false);
     try {
       await login(data.email, data.password);
       router.push('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
+      setLoginError(true);
+      // Error is already handled by AuthContext with toast
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    handleSubmit(onSubmit)(e);
   };
 
   return (
@@ -77,7 +86,7 @@ export default function LoginPage() {
             <p className="text-gray-600">Enter your credentials to access your account</p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleFormSubmit} className="space-y-6">
             <div className="space-y-4">
               <div className="relative group">
                 <Input
@@ -90,8 +99,8 @@ export default function LoginPage() {
                   })}
                   type="email"
                   placeholder="Enter your email"
-                  className="pl-4 pr-4 py-3 bg-gray-50/50 border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 group-hover:border-indigo-300"
-                  error={errors.email?.message}
+                  className={`pl-4 pr-4 py-3 bg-gray-50/50 border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 group-hover:border-indigo-300 ${loginError ? 'animate-shake' : ''}`}
+                  error={errors.email?.message || (loginError ? 'Invalid credentials' : null)}
                 />
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-10 transition-opacity duration-200 pointer-events-none"></div>
               </div>
@@ -108,8 +117,8 @@ export default function LoginPage() {
                     })}
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your password"
-                    className="pl-4 pr-12 py-3 bg-gray-50/50 border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 group-hover:border-indigo-300"
-                    error={errors.password?.message}
+                    className={`pl-4 pr-12 py-3 bg-gray-50/50 border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 group-hover:border-indigo-300 ${loginError ? 'animate-shake' : ''}`}
+                    error={errors.password?.message || (loginError ? 'Invalid credentials' : null)}
                   />
                   <button
                     type="button"
@@ -179,12 +188,22 @@ export default function LoginPage() {
           50% { transform: translateY(-20px); }
         }
         
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+          20%, 40%, 60%, 80% { transform: translateX(3px); }
+        }
+        
         .animate-blob {
           animation: blob 7s infinite;
         }
         
         .animate-float {
           animation: float 6s ease-in-out infinite;
+        }
+        
+        .animate-shake {
+          animation: shake 0.5s ease-in-out;
         }
         
         .animation-delay-2000 {

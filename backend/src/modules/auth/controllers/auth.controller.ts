@@ -1,8 +1,10 @@
-import { Controller, Post, Body, Get, HttpCode } from '@nestjs/common';
+import { Controller, Post, Body, Get, HttpCode, UseGuards } from '@nestjs/common';
 import { AuthService } from '@/modules/auth/services/auth.service';
 import { LoginDto } from '@/modules/auth/dto/login.dto';
 import { RegisterDto } from '@/modules/auth/dto/register.dto';
 import { Public } from '@/common/decorators/public.decorator';
+import { GuestOnly } from '@/common/decorators/guest-only.decorator';
+import { GuestOnlyGuard } from '@/common/guards/guest-only.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { RefreshTokenDto } from '@/modules/auth/dto/refresh-token.dto';
 import { VerifyEmailDto } from '@/modules/auth/dto/verify-email.dto';
@@ -25,6 +27,8 @@ export class AuthController {
    * Creates user and sends verification email
    */
   @ApiOperation({ summary: 'Register a new user' })
+  @UseGuards(GuestOnlyGuard)
+  @GuestOnly()
   @Public()
   @Post('register')
   register(@Body() registerDto: RegisterDto) {
@@ -36,6 +40,8 @@ export class AuthController {
    * Returns JWT tokens for authenticated user
    */
   @ApiOperation({ summary: 'Login user' })
+  @UseGuards(GuestOnlyGuard)
+  @GuestOnly()
   @Public()
   @HttpCode(200)
   @Post('login')

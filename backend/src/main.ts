@@ -13,6 +13,16 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
+
+  const allowedOrigins = process.env.FRONTEND_URLS
+    ? process.env.FRONTEND_URLS.split(',').map(url => url.trim())
+    : ['http://localhost:5000'];
+
+  app.enableCors({
+    origin: allowedOrigins,
+    credentials: true,
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -20,6 +30,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
 
   const reflector = app.get(Reflector);
   app.useGlobalGuards(

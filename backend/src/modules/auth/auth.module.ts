@@ -4,6 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './services/auth.service';
 import { AuthController } from './controllers/auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { GuestOnlyGuard } from '@/common/guards/guest-only.guard';
 import { UsersModule } from '@/modules/users/users.module';
 import { getJwtConfig } from '@/config/jwt.config';
 
@@ -23,6 +24,7 @@ import { getJwtConfig } from '@/config/jwt.config';
   providers: [
     AuthService,
     JwtStrategy,
+    GuestOnlyGuard,
   ],
   exports: [AuthService, JwtStrategy],
 })
