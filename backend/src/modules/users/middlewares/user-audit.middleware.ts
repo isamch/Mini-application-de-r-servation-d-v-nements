@@ -40,27 +40,27 @@ export class UserAuditMiddleware implements NestMiddleware {
     const { method, url, user, params, body } = req as any;
     const timestamp = new Date().toISOString();
 
-// Log user modifications
-  if (method === 'PATCH' || method === 'DELETE' || method === 'POST') {
-    const action = method === 'PATCH' ? 'UPDATED' : method === 'DELETE' ? 'DELETED' : 'CREATED';
-    const targetUserId = params.id || 'new';
-    const actor = user?.email || 'anonymous';
+    // Log user modifications
+    if (method === 'PATCH' || method === 'DELETE' || method === 'POST') {
+      const action = method === 'PATCH' ? 'UPDATED' : method === 'DELETE' ? 'DELETED' : 'CREATED';
+      const targetUserId = params.id || 'new';
+      const actor = user?.email || 'anonymous';
 
-    this.logger.log(
-`[AUDIT] User ${actor} ${action} user ${targetUserId} at ${timestamp}`,
-);
+      this.logger.log(
+        `[AUDIT] User ${actor} ${action} user ${targetUserId} at ${timestamp}`,
+      );
 
-// You can also save to database here
-// await this.auditService.create({
-// actor: user?.id,
-// action,
-// resource: 'user',
-// resourceId: targetUserId,
-// timestamp,
-// changes: body,
-// });
-  }
+      // You can also save to database here
+      // await this.auditService.create({
+      // actor: user?.id,
+      // action,
+      // resource: 'user',
+      // resourceId: targetUserId,
+      // timestamp,
+      // changes: body,
+      // });
+    }
 
-  next();
+    next();
   }
 }
