@@ -43,14 +43,15 @@ export const ToastProvider = ({ children }) => {
       {children}
       
       {/* Toast Container */}
-      <div className="fixed top-0 right-0 z-50 p-6 space-y-4 pointer-events-none">
+      <div className="fixed top-6 right-6 z-50 space-y-3 pointer-events-none">
         {toasts.map((toastItem, index) => (
           <div 
             key={toastItem.id}
-            className="pointer-events-auto"
+            className="pointer-events-auto transform transition-all duration-300 ease-out"
             style={{
-              transform: `translateY(${index * 80}px)`,
-              transition: 'transform 0.3s ease-out'
+              transform: `translateY(${index * 4}px) scale(${1 - index * 0.02})`,
+              opacity: 1 - index * 0.1,
+              zIndex: 50 - index
             }}
           >
             <Toast

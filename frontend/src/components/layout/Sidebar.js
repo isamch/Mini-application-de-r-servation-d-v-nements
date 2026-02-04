@@ -51,69 +51,85 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
       {/* Sidebar */}
       <div className={cn(
-        "fixed left-0 top-0 h-full bg-white/90 backdrop-blur-lg border-r border-gray-200 z-50 transition-all duration-300 ease-in-out",
+        "fixed left-0 top-0 h-screen bg-white/90 backdrop-blur-lg border-r border-gray-200 z-50 transition-all duration-300 ease-in-out flex flex-col justify-between",
         isOpen ? "w-64" : "w-16",
         "lg:relative lg:translate-x-0",
-        !isOpen && "-translate-x-full lg:translate-x-0"
+        !isOpen && "lg:translate-x-0"
       )}>
         {/* Toggle Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="absolute -right-3 top-6 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors duration-200"
+          className="absolute -right-3 top-6 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors duration-200 z-10"
         >
           {isOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
         </button>
 
-        {/* Logo */}
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Calendar className="w-5 h-5 text-white" />
-            </div>
-            {isOpen && (
-              <div>
-                <h2 className="font-bold text-gray-900">EventHub</h2>
-                <p className="text-xs text-gray-500">{isAdmin ? 'Admin' : 'Dashboard'}</p>
+        {/* Top Section */}
+        <div className="flex flex-col">
+          {/* Logo */}
+          <div className={cn(
+            "p-4 border-b border-gray-200",
+            !isOpen && "flex justify-center"
+          )}>
+            <div className={cn(
+              "flex items-center",
+              isOpen ? "space-x-3" : "justify-center"
+            )}>
+              <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Calendar className="w-5 h-5 text-white" />
               </div>
-            )}
+              {isOpen && (
+                <div>
+                  <h2 className="font-bold text-gray-900">EventHub</h2>
+                  <p className="text-xs text-gray-500">{isAdmin ? 'Admin' : 'Dashboard'}</p>
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Navigation */}
+          <nav className={cn(
+            "flex-1 p-4 flex flex-col gap-1.5 overflow-y-auto scrollbar-hide",
+            !isOpen && "items-center"
+          )}>
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+              
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center rounded-xl transition-all duration-200 group",
+                    isOpen ? "px-3 py-2 space-x-3" : "w-10 h-10 justify-center",
+                    isActive 
+                      ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg" 
+                      : "text-gray-600 hover:bg-gray-100 hover:text-indigo-600"
+                  )}
+                >
+                  <Icon className={cn(
+                    "w-5 h-5 flex-shrink-0",
+                    isActive ? "text-white" : "text-gray-400 group-hover:text-indigo-600"
+                  )} />
+                  {isOpen && (
+                    <span className="font-medium">{item.name}</span>
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
 
-        {/* Navigation */}
-        <nav className="p-4 space-y-2">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href;
-            
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  "flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group",
-                  isActive 
-                    ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg" 
-                    : "text-gray-600 hover:bg-gray-100 hover:text-indigo-600"
-                )}
-              >
-                <Icon className={cn(
-                  "w-5 h-5 flex-shrink-0",
-                  isActive ? "text-white" : "text-gray-400 group-hover:text-indigo-600"
-                )} />
-                {isOpen && (
-                  <span className="font-medium">{item.name}</span>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
         {/* User Info */}
-        {isOpen && (
-          <div className="absolute bottom-4 left-4 right-4">
-            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-3">
+        <div className={cn(
+          "p-4 flex-shrink-0",
+          !isOpen && "flex justify-center items-center"
+        )}>
+          {isOpen ? (
+            <div className="bg-gray-50 rounded-xl p-3 transition-all duration-300">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
                   <span className="text-white text-sm font-medium">
                     {user?.firstName?.[0]}{user?.lastName?.[0]}
                   </span>
@@ -126,8 +142,14 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg transition-all duration-300">
+              <span className="text-white text-sm font-medium">
+                {user?.firstName?.[0]}{user?.lastName?.[0]}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </>
   );
