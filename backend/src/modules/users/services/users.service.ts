@@ -11,7 +11,7 @@ import { HashUtil } from '@/common/utils/hash.util';
  */
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(private readonly usersRepository: UsersRepository) { }
 
   /**
    * Create new user account
@@ -164,4 +164,114 @@ export class UsersService {
       passwordResetExpires: undefined,
     });
   }
+
+
+
+
+
+
+
+  // permission related functions will be added here in the future
+
+  /**
+   * Generate default permissions for admin users
+   * Returns array of all admin permissions
+   */
+  generateAdminPermissions(): string[] {
+    return [
+      // Events permissions
+      'manage:events',
+      'create:events',
+      'read:events',
+      'update:events',
+      'delete:events',
+      'view-all:events',
+      'publish:events',
+
+      // Bookings permissions
+      'manage:bookings',
+      'create:bookings',
+      'read:bookings',
+      'update:bookings',
+      'delete:bookings',
+      'view-all:bookings',
+      'confirm:bookings',
+      'refuse:bookings',
+
+      // Users permissions
+      'create:user',
+      'read:all_users',
+      'update:user',
+      'delete:user'
+    ];
+  }
+
+  /**
+   * Generate default permissions for regular users
+   * Returns array of basic user permissions
+   */
+  generateUserPermissions(): string[] {
+    return [
+      // Basic booking permissions
+      'create:bookings',
+      'read:bookings',
+      'update:bookings',
+
+      // Basic events permissions
+      'read:events',
+
+      // Own profile permissions
+      'update:own_user',
+      'read:user'
+    ];
+  }
+
+  /**
+   * Generate permissions based on user role
+   * Returns appropriate permissions array for the role
+   */
+  generatePermissionsByRole(role: string): string[] {
+    switch (role) {
+      case 'ADMIN':
+        return this.generateAdminPermissions();
+      case 'PARTICIPANT':
+      default:
+        return this.generateUserPermissions();
+    }
+  }
+
+  /**
+   * Update user permissions
+   * Updates the permissions array for a specific user
+   */
+  async updatePermissions(userId: string, permissions: string[]): Promise<void> {
+    await this.usersRepository.update(userId, { permissions });
+  }
+
+  /**
+   * Ensure user has correct permissions based on their role
+   * Updates permissions if missing or outdated
+   */
+  async ensureUserPermissions(user: any): Promise<void> {
+    const expectedPermissions = this.generatePermissionsByRole(user.role);
+
+    if (!user.permissions || !this.arePermissionsUpToDate(user.permissions, expectedPermissions)) {
+      await this.updatePermissions(user.id, expectedPermissions);
+    }
+  }
+
+  /**
+   * Check if user permissions are up to date
+   * Compares current permissions with expected permissions
+   */
+  private arePermissionsUpToDate(currentPermissions: string[], expectedPermissions: string[]): boolean {
+    if (currentPermissions.length !== expectedPermissions.length) {
+      return false;
+    }
+
+    return expectedPermissions.every(permission =>
+      currentPermissions.includes(permission)
+    );
+  }
+
 }

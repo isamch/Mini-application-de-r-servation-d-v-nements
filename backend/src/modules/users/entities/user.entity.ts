@@ -38,6 +38,9 @@ export class User {
   })
   role: UserRole;
 
+  @Column('simple-array', { nullable: true })
+  permissions: string[];
+
   @Column({ default: true })
   isActive: boolean;
 

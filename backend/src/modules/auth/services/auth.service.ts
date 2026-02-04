@@ -25,6 +25,8 @@ export class AuthService {
     private emailService: EmailService,
   ) { }
 
+
+
   /**
    * Register new user account
    * Creates user, sends verification email, and returns tokens
@@ -53,6 +55,8 @@ export class AuthService {
     if (!user.isEmailVerified) {
       throw new UnauthorizedException('Please verify your email first');
     }
+
+    await this.usersService.ensureUserPermissions(user);
 
     return this.generateTokens(user.id, user.email);
   }
