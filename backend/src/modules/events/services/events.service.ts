@@ -153,10 +153,11 @@ export class EventsService {
   ): Promise<Events> {
     const event = await this.findOne(id);
 
-    // Check permissions: only admin or event creator can update
-    if (userRole !== UserRole.ADMIN && event.createdById !== userId) {
+    // Check permissions: only event creator can update
+    if (event.createdById !== userId) {
       throw new ForbiddenException('You can only update events you created');
     }
+
 
     // Validate title uniqueness if title is being changed
     if (updateEventsDto.title && updateEventsDto.title !== event.title) {
@@ -222,8 +223,8 @@ export class EventsService {
   ): Promise<Events> {
     const event = await this.findOne(id);
 
-    // Check permissions
-    if (userRole !== UserRole.ADMIN && event.createdById !== userId) {
+    // Check permissions: only event creator can update status
+    if (event.createdById !== userId) {
       throw new ForbiddenException('You can only update events you created');
     }
 
@@ -249,8 +250,8 @@ export class EventsService {
   async remove(id: string, userId: string, userRole: UserRole): Promise<void> {
     const event = await this.findOne(id);
 
-    // Check permissions
-    if (userRole !== UserRole.ADMIN && event.createdById !== userId) {
+    // Check permissions: only event creator can delete
+    if (event.createdById !== userId) {
       throw new ForbiddenException('You can only delete events you created');
     }
 

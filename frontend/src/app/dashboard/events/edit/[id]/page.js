@@ -42,6 +42,14 @@ export default function EditEventPage() {
     try {
       const response = await api.get(`/events/${id}`);
       const eventData = response.data.data;
+      
+      // Check if user is the event creator
+      if (eventData.createdById !== user.id) {
+        toast.error('You can only edit events you created');
+        router.push('/dashboard/events');
+        return;
+      }
+      
       setEvent({
         title: eventData.title,
         description: eventData.description,
@@ -132,15 +140,6 @@ export default function EditEventPage() {
       </div>
 
       <div className="relative z-10 p-6 md:p-8">
-        {/* Back Button */}
-        <button
-          onClick={() => router.back()}
-          className="flex items-center text-indigo-600 hover:text-indigo-800 mb-8 transition-all duration-300 group bg-white/60 backdrop-blur-sm rounded-2xl px-4 py-2 border border-white/20 hover:bg-white/80 transform hover:-translate-y-1"
-        >
-          <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform duration-200" />
-          <span className="font-medium">Back</span>
-        </button>
-
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">

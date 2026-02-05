@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Sidebar from '@/components/layout/Sidebar';
+import DynamicBreadcrumb from '@/components/layout/DynamicBreadcrumb';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function DashboardLayout({ children }) {
@@ -19,6 +20,7 @@ export default function DashboardLayout({ children }) {
     <div className="flex h-screen bg-gray-50">
       <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
       <main className="flex-1 overflow-auto">
+        <DynamicBreadcrumb />
         {children}
       </main>
     </div>

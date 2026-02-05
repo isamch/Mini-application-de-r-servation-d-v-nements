@@ -10,7 +10,9 @@ import {
   BookOpen,
   User,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { cn } from '@/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,11 +21,11 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const pathname = usePathname();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
+  const [eventsExpanded, setEventsExpanded] = useState(pathname.includes('/events'));
 
   const adminNavItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Home },
     { name: 'Events', href: '/dashboard/events', icon: Calendar },
-    { name: 'Bookings', href: '/dashboard/bookings', icon: BookOpen },
     { name: 'Users', href: '/dashboard/users', icon: Users },
     { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
