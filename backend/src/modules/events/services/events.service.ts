@@ -279,16 +279,18 @@ export class EventsService {
 
   /**
   * Search events with filters
-  * Advanced filtering and search
+  * Backend filtering for status and creator only
   */
   async findWithFilters(queryDto: QueryEventsDto): Promise<Events[]> {
-    // This will use repository methods based on filters
-    if (queryDto.status) {
-      return this.eventsRepository.findByStatus(queryDto.status);
+    // If both status and createdById are provided
+    if (queryDto.createdById && queryDto.status) {
+      const eventsByCreator = await this.eventsRepository.findByCreator(queryDto.createdById);
+      return eventsByCreator.filter(event => event.status === queryDto.status);
     }
 
-    if (queryDto.date) {
-      return this.eventsRepository.findByDate(new Date(queryDto.date));
+    // Single filter cases
+    if (queryDto.status) {
+      return this.eventsRepository.findByStatus(queryDto.status);
     }
 
     if (queryDto.createdById) {
