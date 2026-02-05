@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import api from '@/lib/api';
 import { EventBookingsSkeleton } from '@/components/ui/Skeleton';
+import ReasonModal from '@/components/ui/ReasonModal';
 import { 
   User, 
   CheckCircle, 
@@ -23,6 +24,8 @@ export default function EventBookingsPage() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalConfig, setModalConfig] = useState({});
   const { id } = useParams();
   const { user } = useAuth();
   const toast = useToast();
@@ -49,6 +52,20 @@ export default function EventBookingsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleReasonSubmit = (reason) => {
+    handleStatusChange(modalConfig.bookingId, modalConfig.action, reason);
+  };
+
+  const openReasonModal = (bookingId, action) => {
+    setModalConfig({
+      bookingId,
+      action,
+      title: action === 'refuse' ? 'Refuse Booking' : 'Cancel Booking',
+      placeholder: action === 'refuse' ? 'Please provide a reason for refusing this booking...' : 'Please provide a reason for canceling this booking...'
+    });
+    setModalOpen(true);
   };
 
   const handleStatusChange = async (bookingId, action, reason = '') => {
@@ -361,10 +378,7 @@ export default function EventBookingsPage() {
                                   Confirm
                                 </Button>
                                 <Button
-                                  onClick={() => {
-                                    const reason = prompt('Reason for refusal:');
-                                    if (reason) handleStatusChange(booking.id, 'refuse', reason);
-                                  }}
+                                  onClick={() => openReasonModal(booking.id, 'refuse')}
                                   loading={actionLoading === booking.id}
                                   className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-medium"
                                 >
@@ -375,10 +389,7 @@ export default function EventBookingsPage() {
                             )}
                             {(booking.status === 'confirmed' || booking.status === 'pending') && (
                               <Button
-                                onClick={() => {
-                                  const reason = prompt('Reason for cancellation:');
-                                  if (reason) handleStatusChange(booking.id, 'cancel', reason);
-                                }}
+                                onClick={() => openReasonModal(booking.id, 'cancel')}
                                 loading={actionLoading === booking.id}
                                 className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded text-xs font-medium"
                               >
@@ -401,6 +412,14 @@ export default function EventBookingsPage() {
           </table>
         </div>
       </div>
+      
+      <ReasonModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSubmit={handleReasonSubmit}
+        title={modalConfig.title}
+        placeholder={modalConfig.placeholder}
+      />
     </div>
   );
 }
