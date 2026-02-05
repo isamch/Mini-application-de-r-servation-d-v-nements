@@ -32,8 +32,7 @@ export class CreateEventsDto {
     example: '2024-12-25'
   })
   @IsDateString()
-  @Transform(({ value }) => new Date(value))
-  date: Date;
+  date: string;
 
   @ApiProperty({
     description: 'Event start time',

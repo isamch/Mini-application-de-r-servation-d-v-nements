@@ -4,18 +4,31 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import api from '@/lib/api';
-import { Calendar, MapPin, Users, Clock, ArrowLeft, User, Star } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, ArrowLeft, User, Star, Edit, Trash2, Settings, CheckCircle, MoreVertical } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import Link from 'next/link';
 
 export default function EventDetailsPage() {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
-  const [notes, setNotes] = useState('');
+  const [actionLoading, setActionLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const { id } = useParams();
   const { user } = useAuth();
   const toast = useToast();
   const router = useRouter();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showDropdown && !event.target.closest('.relative')) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showDropdown]);
 
   useEffect(() => {
     if (id) {
@@ -33,6 +46,34 @@ export default function EventDetailsPage() {
       router.push('/dashboard/events');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteEvent = async () => {
+    if (!confirm('Are you sure you want to delete this event?')) return;
+    
+    setActionLoading(true);
+    try {
+      await api.delete(`/events/${id}`);
+      toast.success('Event deleted successfully');
+      router.push('/dashboard/events');
+    } catch (error) {
+      toast.error('Failed to delete event');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (newStatus) => {
+    setActionLoading(true);
+    try {
+      await api.patch(`/events/${id}`, { status: newStatus });
+      toast.success(`Event ${newStatus} successfully`);
+      fetchEvent();
+    } catch (error) {
+      toast.error('Failed to update event status');
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -159,19 +200,60 @@ export default function EventDetailsPage() {
         <div className="bg-gradient-to-br from-indigo-50 via-white to-purple-50 rounded-3xl shadow-xl border border-white/20 overflow-hidden mb-8">
           <div className="p-8">
             {/* Status Badges */}
-            <div className="flex items-center gap-3 mb-6">
-              <span className={`px-4 py-2 text-white text-sm font-semibold rounded-full shadow-lg ${statusBadge.className}`}>
-                {statusBadge.text}
-              </span>
-              {isAlmostFull && !isFullyBooked && canBook && (
-                <span className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-semibold rounded-full shadow-lg">
-                  Almost Full
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <span className={`px-4 py-2 text-white text-sm font-semibold rounded-full shadow-lg ${statusBadge.className}`}>
+                  {statusBadge.text}
                 </span>
-              )}
-              {isFullyBooked && (
-                <span className="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-600 text-white text-sm font-semibold rounded-full shadow-lg">
-                  Fully Booked
-                </span>
+                {isAlmostFull && !isFullyBooked && canBook && (
+                  <span className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-semibold rounded-full shadow-lg">
+                    Almost Full
+                  </span>
+                )}
+                {isFullyBooked && (
+                  <span className="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-600 text-white text-sm font-semibold rounded-full shadow-lg">
+                    Fully Booked
+                  </span>
+                )}
+              </div>
+              
+              {/* Admin Dropdown */}
+              {user?.role === 'admin' && (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowDropdown(!showDropdown)}
+                    className="p-2 rounded-full hover:bg-white/50 transition-colors duration-200 backdrop-blur-sm"
+                  >
+                    <MoreVertical className="w-5 h-5 text-gray-600" />
+                  </button>
+                  
+                  {showDropdown && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-10">
+                      <Link 
+                        href={`/dashboard/events/edit/${event.id}`}
+                        className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                        onClick={() => setShowDropdown(false)}
+                      >
+                        <Edit className="w-4 h-4 mr-3 text-indigo-600" />
+                        Edit Event
+                      </Link>
+                      
+                      <hr className="my-2" />
+                      
+                      <button
+                        onClick={() => {
+                          handleDeleteEvent();
+                          setShowDropdown(false);
+                        }}
+                        disabled={actionLoading}
+                        className="w-full flex items-center px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-200 disabled:opacity-50"
+                      >
+                        <Trash2 className="w-4 h-4 mr-3" />
+                        Delete Event
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
@@ -229,7 +311,7 @@ export default function EventDetailsPage() {
           </div>
         </div>
 
-        {/* Organizer Card */}
+
         {event.createdBy && (
           <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 p-6 mb-8">
             <div className="flex items-center">

@@ -74,7 +74,7 @@ export class EventsService {
     }
 
     // Validate event date is in the future
-    if (createEventsDto.date <= new Date()) {
+    if (new Date(createEventsDto.date) <= new Date()) {
       throw new BadRequestException('Event date must be in the future');
     }
 
@@ -83,9 +83,10 @@ export class EventsService {
       throw new BadRequestException('Event capacity must be greater than 0');
     }
 
-    // Create event with creator ID
+    // Create event with creator ID and convert date string to Date
     const eventData = {
       ...createEventsDto,
+      date: new Date(createEventsDto.date),
       createdById: userId,
     };
 
@@ -165,8 +166,8 @@ export class EventsService {
       }
     }
 
-    // Validate date if being changed (date is already Date object from DTO)
-    if (updateEventsDto.date && updateEventsDto.date <= new Date()) {
+    // Validate date if being changed
+    if (updateEventsDto.date && new Date(updateEventsDto.date) <= new Date()) {
       throw new BadRequestException('Event date must be in the future');
     }
 
@@ -177,8 +178,33 @@ export class EventsService {
       );
     }
 
-    // No need for data transformation - DTO already has correct types
-    return this.eventsRepository.update(id, updateEventsDto);
+
+    // // check status
+    // if (event.status === EventStatus.CANCELED && updateEventsDto.status !== EventStatus.CANCELED) {
+    //   throw new BadRequestException('Cannot change status of a canceled event');
+    // }
+
+
+
+    // Convert date string to Date object if provided
+    const updateData: any = { ...updateEventsDto };
+    if (updateData.date) {
+      updateData.date = new Date(updateData.date);
+      
+      // Auto-update status based on new date
+      const newDate = updateData.date;
+      const now = new Date();
+      
+      if (event.status === EventStatus.EXPIRED && newDate > now) {
+        // If event was expired but new date is in future, make it published
+        updateData.status = EventStatus.PUBLISHED;
+      } else if (event.status === EventStatus.PUBLISHED && newDate <= now) {
+        // If event was published but new date is in past, make it expired
+        updateData.status = EventStatus.EXPIRED;
+      }
+    }
+
+    return this.eventsRepository.update(id, updateData);
   }
 
 
@@ -356,7 +382,7 @@ export class EventsService {
     
     for (const event of publishedEvents) {
       if (this.isEventExpired(event)) {
-        // يمكن تغيير الحالة إلى EXPIRED أو COMPLETED حسب المطلوب
+        // update status to expired if event is past its end time
         await this.eventsRepository.updateStatus(event.id, EventStatus.EXPIRED);
       }
     }
