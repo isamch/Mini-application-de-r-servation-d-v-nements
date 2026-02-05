@@ -18,6 +18,48 @@ export class EventsService {
     private readonly eventsRepository: EventsRepository,
   ) { }
 
+  /**
+   * Check if event is expired
+   * Returns true if current date/time is past event end time
+   */
+  private isEventExpired(event: Events): boolean {
+    const now = new Date();
+    const eventDateTime = new Date(`${event.date.toISOString().split('T')[0]}T${event.endTime}`);
+    return now > eventDateTime;
+  }
+
+  /**
+   * Add isExpired property and update status if needed
+   */
+  private async addExpiredFlagAndUpdate(event: Events): Promise<Events & { isExpired: boolean }> {
+    const isExpired = this.isEventExpired(event);
+    
+    // if event is expired and still published, update status to expired
+    if (isExpired && event.status === EventStatus.PUBLISHED) {
+      await this.eventsRepository.updateStatus(event.id, EventStatus.EXPIRED);
+      event.status = EventStatus.EXPIRED;
+    }
+    
+    return {
+      ...event,
+      isExpired
+    };
+  }
+
+  /**
+   * Add isExpired property and update status for multiple events
+   */
+  private async addExpiredFlagsAndUpdate(events: Events[]): Promise<(Events & { isExpired: boolean })[]> {
+    const updatedEvents = [];
+    
+    for (const event of events) {
+      const updatedEvent = await this.addExpiredFlagAndUpdate(event);
+      updatedEvents.push(updatedEvent);
+    }
+    
+    return updatedEvents;
+  }
+
 
 
   /**
@@ -54,33 +96,35 @@ export class EventsService {
 
   /**
    * Get all events (Admin only)
-   * Returns all events regardless of status
+   * Returns all events regardless of status with isExpired flag
    */
-  async findAll(): Promise<Events[]> {
-    return this.eventsRepository.findAll();
+  async findAll(): Promise<(Events & { isExpired: boolean })[]> {
+    const events = await this.eventsRepository.findAll();
+    return this.addExpiredFlagsAndUpdate(events);
   }
 
 
   /**
-   * Get published events only
+   * Get published events only with isExpired flag
    * Available for public booking
    */
-  async findPublished(): Promise<Events[]> {
-    return this.eventsRepository.findPublished();
+  async findPublished(): Promise<(Events & { isExpired: boolean })[]> {
+    const events = await this.eventsRepository.findPublished();
+    return this.addExpiredFlagsAndUpdate(events);
   }
 
 
 
   /**
-  * Find event by ID
+  * Find event by ID with isExpired flag
   * Returns event details with relations
   */
-  async findOne(id: string): Promise<Events> {
+  async findOne(id: string): Promise<Events & { isExpired: boolean }> {
     const event = await this.eventsRepository.findById(id);
     if (!event) {
       throw new NotFoundException('Event not found');
     }
-    return event;
+    return this.addExpiredFlagAndUpdate(event);
   }
 
 
@@ -278,26 +322,44 @@ export class EventsService {
 
 
   /**
-  * Search events with filters
+  * Search events with filters and isExpired flags
   * Backend filtering for status and creator only
   */
-  async findWithFilters(queryDto: QueryEventsDto): Promise<Events[]> {
+  async findWithFilters(queryDto: QueryEventsDto): Promise<(Events & { isExpired: boolean })[]> {
+    let events: Events[];
+
     // If both status and createdById are provided
     if (queryDto.createdById && queryDto.status) {
       const eventsByCreator = await this.eventsRepository.findByCreator(queryDto.createdById);
-      return eventsByCreator.filter(event => event.status === queryDto.status);
+      events = eventsByCreator.filter(event => event.status === queryDto.status);
     }
-
     // Single filter cases
-    if (queryDto.status) {
-      return this.eventsRepository.findByStatus(queryDto.status);
+    else if (queryDto.status) {
+      events = await this.eventsRepository.findByStatus(queryDto.status);
+    }
+    else if (queryDto.createdById) {
+      events = await this.eventsRepository.findByCreator(queryDto.createdById);
+    }
+    else {
+      events = await this.eventsRepository.findAll();
     }
 
-    if (queryDto.createdById) {
-      return this.eventsRepository.findByCreator(queryDto.createdById);
-    }
+    return this.addExpiredFlagsAndUpdate(events);
+  }
 
-    return this.eventsRepository.findAll();
+  /**
+   * Mark expired events as completed or expired
+   * Should be called by cron job
+   */
+  async markExpiredEventsAsCompleted(): Promise<void> {
+    const publishedEvents = await this.eventsRepository.findByStatus(EventStatus.PUBLISHED);
+    
+    for (const event of publishedEvents) {
+      if (this.isEventExpired(event)) {
+        // يمكن تغيير الحالة إلى EXPIRED أو COMPLETED حسب المطلوب
+        await this.eventsRepository.updateStatus(event.id, EventStatus.EXPIRED);
+      }
+    }
   }
 
 

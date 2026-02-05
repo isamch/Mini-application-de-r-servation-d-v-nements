@@ -33,6 +33,22 @@ export default function EventsPage() {
     fetchEventsWithFilters(urlFilters);
   }, [searchParams]);
 
+  // Apply date filter when both dates are selected
+  useEffect(() => {
+    if (filters.startDate && filters.endDate) {
+      setEventsLoading(true);
+      setTimeout(() => {
+        fetchEventsWithFilters(filters);
+      }, 300);
+    } else if (!filters.startDate && !filters.endDate) {
+      // Clear date filter when both dates are empty
+      setEventsLoading(true);
+      setTimeout(() => {
+        fetchEventsWithFilters(filters);
+      }, 300);
+    }
+  }, [filters.startDate, filters.endDate]);
+
   const fetchEventsWithFilters = async (filterParams) => {
     setEventsLoading(true);
     try {
@@ -91,13 +107,14 @@ export default function EventsPage() {
         if (v && v !== '') params.set(k, v.toString());
       });
       router.push(`/dashboard/events?${params.toString()}`);
-    } else if (key === 'startDate' || key === 'endDate') {
-      // Apply frontend filter immediately
+    } else if (key === 'search') {
+      // Apply search filter immediately
       setEventsLoading(true);
       setTimeout(() => {
         fetchEventsWithFilters(newFilters);
       }, 300);
     }
+    // Date filters will be applied when both dates are selected
   };
 
   const formatDate = (dateString) => {
@@ -113,6 +130,10 @@ export default function EventsPage() {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const clearDateFilter = () => {
+    setFilters(prev => ({ ...prev, startDate: '', endDate: '' }));
   };
 
   if (loading) {
@@ -139,7 +160,7 @@ export default function EventsPage() {
         {/* Modern Search and Filter Bar */}
         <div className="mb-6">
           <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 p-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
+            <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 items-end">
               
               {/* Search Bar */}
               <div className="lg:col-span-4">
@@ -156,31 +177,37 @@ export default function EventsPage() {
                 </div>
               </div>
 
-              {/* Start Date */}
-              <div className="lg:col-span-3">
-                <label className="block text-sm font-semibold text-slate-700 mb-3">Start Date</label>
-                <div className="relative">
-                  <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                  <input
-                    type="date"
-                    value={filters.startDate}
-                    onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                    className="w-full pl-12 pr-4 py-4 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white text-slate-700 shadow-sm transition-all duration-200"
-                  />
+              {/* Date Range */}
+              <div className="lg:col-span-4">
+                <div className="flex items-center justify-between mb-3">
+                  <label className="block text-sm font-semibold text-slate-700">Date Range</label>
+                  {(filters.startDate || filters.endDate) && (
+                    <button
+                      onClick={clearDateFilter}
+                      className="text-xs text-purple-600 hover:text-purple-800 font-medium"
+                    >
+                      Clear
+                    </button>
+                  )}
                 </div>
-              </div>
-
-              {/* End Date */}
-              <div className="lg:col-span-3">
-                <label className="block text-sm font-semibold text-slate-700 mb-3">End Date</label>
-                <div className="relative">
-                  <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                  <input
-                    type="date"
-                    value={filters.endDate}
-                    onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                    className="w-full pl-12 pr-4 py-4 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white text-slate-700 shadow-sm transition-all duration-200"
-                  />
+                <div className="flex gap-3">
+                  <div className="relative flex-1">
+                    <input
+                      type="date"
+                      value={filters.startDate}
+                      onChange={(e) => handleFilterChange('startDate', e.target.value)}
+                      className="w-full px-4 py-4 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white text-slate-700 shadow-sm transition-all duration-200"
+                    />
+                  </div>
+                  <span className="flex items-center text-slate-400 font-medium">to</span>
+                  <div className="relative flex-1">
+                    <input
+                      type="date"
+                      value={filters.endDate}
+                      onChange={(e) => handleFilterChange('endDate', e.target.value)}
+                      className="w-full px-4 py-4 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white text-slate-700 shadow-sm transition-all duration-200"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -193,9 +220,12 @@ export default function EventsPage() {
                     onChange={(e) => handleFilterChange('status', e.target.value)}
                     className="w-full px-4 py-4 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white text-slate-700 shadow-sm transition-all duration-200 appearance-none cursor-pointer"
                   >
+                    <option value="">All</option>
                     <option value="published">Published</option>
                     <option value="draft">Draft</option>
                     <option value="canceled">Canceled</option>
+                    <option value="completed">Completed</option>
+                    <option value="expired">Expired</option>
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
                 </div>
