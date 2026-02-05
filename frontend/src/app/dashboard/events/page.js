@@ -15,7 +15,7 @@ export default function EventsPage() {
     search: '',
     startDate: '',
     endDate: '',
-    status: 'published'
+    status: ''
   });
   const { user } = useAuth();
   const router = useRouter();
@@ -27,7 +27,7 @@ export default function EventsPage() {
       search: searchParams.get('search') || '',
       startDate: searchParams.get('startDate') || '',
       endDate: searchParams.get('endDate') || '',
-      status: searchParams.get('status') || 'published'
+      status: searchParams.get('status') || ''
     };
     setFilters(urlFilters);
     fetchEventsWithFilters(urlFilters);

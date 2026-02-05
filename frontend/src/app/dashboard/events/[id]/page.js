@@ -76,6 +76,48 @@ export default function EventDetailsPage() {
     });
   };
 
+  const getStatusBadge = (status, isExpired) => {
+    if (isExpired && status === 'published') {
+      return {
+        text: 'Expired',
+        className: 'bg-gradient-to-r from-red-500 to-pink-600'
+      };
+    }
+    
+    switch (status) {
+      case 'published':
+        return {
+          text: 'Published',
+          className: 'bg-gradient-to-r from-emerald-500 to-teal-600'
+        };
+      case 'draft':
+        return {
+          text: 'Draft',
+          className: 'bg-gradient-to-r from-yellow-500 to-orange-500'
+        };
+      case 'canceled':
+        return {
+          text: 'Canceled',
+          className: 'bg-gradient-to-r from-red-500 to-pink-600'
+        };
+      case 'completed':
+        return {
+          text: 'Completed',
+          className: 'bg-gradient-to-r from-blue-500 to-indigo-600'
+        };
+      case 'expired':
+        return {
+          text: 'Expired',
+          className: 'bg-gradient-to-r from-red-500 to-pink-600'
+        };
+      default:
+        return {
+          text: 'Unknown',
+          className: 'bg-gradient-to-r from-gray-400 to-gray-500'
+        };
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -98,6 +140,8 @@ export default function EventDetailsPage() {
   const availableSpots = event.maxCapacity - event.currentBookings;
   const isFullyBooked = availableSpots <= 0;
   const isAlmostFull = availableSpots <= event.maxCapacity * 0.2;
+  const statusBadge = getStatusBadge(event.status, event.isExpired);
+  const canBook = event.status === 'published' && !event.isExpired && !isFullyBooked;
 
   return (
     <div className="p-8">
@@ -116,10 +160,10 @@ export default function EventDetailsPage() {
           <div className="p-8">
             {/* Status Badges */}
             <div className="flex items-center gap-3 mb-6">
-              <span className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-sm font-semibold rounded-full shadow-lg">
-                Published
+              <span className={`px-4 py-2 text-white text-sm font-semibold rounded-full shadow-lg ${statusBadge.className}`}>
+                {statusBadge.text}
               </span>
-              {isAlmostFull && !isFullyBooked && (
+              {isAlmostFull && !isFullyBooked && canBook && (
                 <span className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-semibold rounded-full shadow-lg">
                   Almost Full
                 </span>
@@ -225,7 +269,7 @@ export default function EventDetailsPage() {
         </div>
 
         {/* Booking Section */}
-        {user && user.role === 'participant' && (
+        {user && user.role === 'participant' && canBook && (
           <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 p-8">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">Book This Event</h3>
             
@@ -247,15 +291,24 @@ export default function EventDetailsPage() {
             <Button
               onClick={handleBooking}
               loading={bookingLoading}
-              disabled={isFullyBooked}
-              className={`w-full py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
-                isFullyBooked 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white'
-              }`}
+              className="w-full py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
             >
-              {isFullyBooked ? 'Event Fully Booked' : bookingLoading ? 'Processing...' : 'Book Now'}
+              {bookingLoading ? 'Processing...' : 'Book Now'}
             </Button>
+          </div>
+        )}
+
+        {/* Event Not Available Message */}
+        {user && user.role === 'participant' && !canBook && (
+          <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 p-8 text-center">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Event Not Available</h3>
+            <p className="text-gray-600">
+              {event.isExpired || event.status === 'expired' ? 'This event has expired and is no longer available for booking.' :
+               event.status === 'canceled' ? 'This event has been canceled.' :
+               event.status === 'completed' ? 'This event has been completed.' :
+               isFullyBooked ? 'This event is fully booked.' :
+               'This event is not available for booking.'}
+            </p>
           </div>
         )}
 
