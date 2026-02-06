@@ -233,7 +233,7 @@ export class BookingsService {
     });
 
     // Send confirmation email with download link
-    await this.sendBookingConfirmationEmail(updatedBooking);
+    // await this.sendBookingConfirmationEmail(updatedBooking);
 
     return updatedBooking;
   }

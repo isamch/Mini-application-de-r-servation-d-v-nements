@@ -282,17 +282,13 @@ export class BookingsController {
   async downloadTicket(
     @Param('id') id: string,
     @CurrentUser() user: any,
-    @Res() res: Response
-  ): Promise<void> {
+  ) {
     const pdfBuffer = await this.bookingsService.generateTicketPdf(id, user.id);
-
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="ticket-${id}.pdf"`,
-      'Content-Length': pdfBuffer.length,
-    });
-
-    res.send(pdfBuffer);
+    return {
+      data: pdfBuffer.toString('base64'),
+      filename: `ticket-${id}.pdf`,
+      contentType: 'application/pdf'
+    };
   }
 
 
