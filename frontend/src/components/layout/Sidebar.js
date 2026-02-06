@@ -34,7 +34,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const participantNavItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Home },
     { name: 'Browse Events', href: '/dashboard/events', icon: Calendar },
-    { name: 'My Bookings', href: '/dashboard/bookings', icon: BookOpen },
+    { name: 'My Bookings', href: '/dashboard/my-bookings', icon: BookOpen },
     { name: 'Profile', href: '/dashboard/profile', icon: User },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   ];
