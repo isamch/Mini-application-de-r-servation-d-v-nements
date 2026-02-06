@@ -172,15 +172,9 @@ export default function UsersPage() {
   return (
     <div className="p-8">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Users Management</h1>
-          <p className="text-gray-600 mt-2">Manage system users and their permissions</p>
-        </div>
-        <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
-          <UserPlus className="w-4 h-4 mr-2" />
-          Add New User
-        </Button>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Users Management</h1>
+        <p className="text-gray-600 mt-2">Manage system users and their permissions</p>
       </div>
 
       {/* Filters */}
