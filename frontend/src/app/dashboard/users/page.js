@@ -28,6 +28,7 @@ export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedUser, setSelectedUser] = useState(null);
+  const [deleteModal, setDeleteModal] = useState({ open: false, userId: null, userName: '' });
   const [actionLoading, setActionLoading] = useState(null);
   const [showDropdown, setShowDropdown] = useState(null);
   const { user } = useAuth();
@@ -50,18 +51,17 @@ export default function UsersPage() {
     }
   };
 
-  const handleDeleteUser = async (userId) => {
-    if (!confirm('Are you sure you want to delete this user?')) return;
-    
-    setActionLoading(userId);
+  const handleDeleteUser = async () => {
+    setActionLoading(deleteModal.userId);
     try {
-      await api.delete(`/users/${userId}`);
+      await api.delete(`/users/${deleteModal.userId}`);
       toast.success('User deleted successfully');
       fetchUsers();
     } catch (error) {
-      toast.error('Failed to delete user');
+      toast.error(error.response?.data?.message || 'Failed to delete user');
     } finally {
       setActionLoading(null);
+      setDeleteModal({ open: false, userId: null, userName: '' });
     }
   };
 
@@ -328,11 +328,14 @@ export default function UsersPage() {
                               
                               <button
                                 onClick={() => {
-                                  handleDeleteUser(userData.id);
+                                  setDeleteModal({ 
+                                    open: true, 
+                                    userId: userData.id, 
+                                    userName: `${userData.firstName} ${userData.lastName}` 
+                                  });
                                   setShowDropdown(null);
                                 }}
-                                disabled={actionLoading === userData.id}
-                                className="w-full flex items-center px-4 py-2 text-red-600 hover:bg-red-50 transition-colors duration-200 disabled:opacity-50"
+                                className="w-full flex items-center px-4 py-2 text-red-600 hover:bg-red-50 transition-colors duration-200"
                               >
                                 <Trash2 className="w-4 h-4 mr-3" />
                                 Delete User
@@ -431,6 +434,44 @@ export default function UsersPage() {
                   <p className="text-gray-900">{formatDate(selectedUser.updatedAt)}</p>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal.open && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <Trash2 className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Delete User</h3>
+                <p className="text-sm text-gray-600">This action cannot be undone</p>
+              </div>
+            </div>
+
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to delete <span className="font-semibold">"{deleteModal.userName}"</span>? All their data and bookings will be permanently removed.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteModal({ open: false, userId: null, userName: '' })}
+                disabled={actionLoading}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteUser}
+                disabled={actionLoading}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white rounded-lg font-medium transition-all disabled:opacity-50"
+              >
+                {actionLoading ? 'Deleting...' : 'Yes, Delete'}
+              </button>
             </div>
           </div>
         </div>

@@ -139,8 +139,8 @@ export default function CreateEventPage() {
                   onChange={(e) => handleChange('description', e.target.value)}
                   placeholder="Describe your event"
                   rows={4}
-                  className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/80 backdrop-blur-sm transition-all duration-200 text-gray-900 placeholder-gray-500 ${
-                    errors.description ? 'border-red-500 shake' : 'border-gray-200'
+                  className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/80 backdrop-blur-sm transition-all duration-200 text-gray-900 font-medium placeholder-gray-400 ${
+                    errors.description ? 'border-red-500 shake' : 'border-gray-300'
                   }`}
                 />
                 {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
@@ -227,7 +227,7 @@ export default function CreateEventPage() {
                 <select
                   value={event.status}
                   onChange={(e) => handleChange('status', e.target.value)}
-                  className="w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/80 backdrop-blur-sm transition-all duration-200 text-gray-900 border-gray-200"
+                  className="w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/80 backdrop-blur-sm transition-all duration-200 text-gray-900 font-medium border-gray-300"
                 >
                   <option value="draft">Draft</option>
                   <option value="published">Published</option>

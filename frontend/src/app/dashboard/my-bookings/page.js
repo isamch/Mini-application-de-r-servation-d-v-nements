@@ -12,6 +12,8 @@ export default function MyBookingsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [cancelModal, setCancelModal] = useState({ open: false, bookingId: null });
+  const [cancelReason, setCancelReason] = useState('');
   const { user } = useAuth();
   const toast = useToast();
 
@@ -30,12 +32,14 @@ export default function MyBookingsPage() {
     }
   };
 
-  const handleCancel = async (bookingId) => {
-    if (!confirm('Are you sure you want to cancel this booking?')) return;
-
+  const handleCancel = async () => {
     try {
-      await api.patch(`/bookings/${bookingId}/cancel`);
+      await api.patch(`/bookings/${cancelModal.bookingId}/cancel`, {
+        cancelReason: cancelReason || 'Canceled by user'
+      });
       toast.success('Booking canceled successfully');
+      setCancelModal({ open: false, bookingId: null });
+      setCancelReason('');
       fetchBookings();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to cancel booking');
@@ -183,7 +187,7 @@ export default function MyBookingsPage() {
                       {(booking.status === 'pending' || booking.status === 'confirmed') && (
                         <button
                           onClick={() => {
-                            handleCancel(booking.id);
+                            setCancelModal({ open: true, bookingId: booking.id });
                             setOpenMenuId(null);
                           }}
                           className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
@@ -254,6 +258,54 @@ export default function MyBookingsPage() {
               Browse Events
             </Button>
           </Link>
+        </div>
+      )}
+
+      {/* Cancel Modal */}
+      {cancelModal.open && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <X className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Cancel Booking</h3>
+                <p className="text-sm text-gray-600">Are you sure you want to cancel this booking?</p>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Reason (Optional)
+              </label>
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Why are you canceling?"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none text-gray-900 font-medium placeholder-gray-400"
+                rows="3"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setCancelModal({ open: false, bookingId: null });
+                  setCancelReason('');
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+              >
+                Keep Booking
+              </button>
+              <button
+                onClick={handleCancel}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white rounded-lg font-medium transition-all"
+              >
+                Yes, Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

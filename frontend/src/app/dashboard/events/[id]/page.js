@@ -15,6 +15,7 @@ export default function EventDetailsPage() {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
   const [notes, setNotes] = useState('');
   const [userBooking, setUserBooking] = useState(null);
   const { id } = useParams();
@@ -65,17 +66,16 @@ export default function EventDetailsPage() {
   };
 
   const handleDeleteEvent = async () => {
-    if (!confirm('Are you sure you want to delete this event?')) return;
-    
     setActionLoading(true);
     try {
       await api.delete(`/events/${id}`);
       toast.success('Event deleted successfully');
       router.push('/dashboard/events');
     } catch (error) {
-      toast.error('Failed to delete event');
+      toast.error(error.response?.data?.message || 'Failed to delete event');
     } finally {
       setActionLoading(false);
+      setDeleteModal(false);
     }
   };
 
@@ -247,11 +247,10 @@ export default function EventDetailsPage() {
                           
                           <button
                             onClick={() => {
-                              handleDeleteEvent();
+                              setDeleteModal(true);
                               setShowDropdown(false);
                             }}
-                            disabled={actionLoading}
-                            className="w-full flex items-center px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-200 disabled:opacity-50"
+                            className="w-full flex items-center px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-200"
                           >
                             <Trash2 className="w-4 h-4 mr-3" />
                             Delete Event
@@ -476,6 +475,44 @@ export default function EventDetailsPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <Trash2 className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Delete Event</h3>
+                <p className="text-sm text-gray-600">This action cannot be undone</p>
+              </div>
+            </div>
+
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to delete <span className="font-semibold">"{event?.title}"</span>? All associated bookings will be affected.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteModal(false)}
+                disabled={actionLoading}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteEvent}
+                disabled={actionLoading}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white rounded-lg font-medium transition-all disabled:opacity-50"
+              >
+                {actionLoading ? 'Deleting...' : 'Yes, Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

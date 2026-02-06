@@ -5,6 +5,8 @@ import { UpdateEventsDto } from '../dto/update-events.dto';
 import { QueryEventsDto } from '../dto/query-events.dto';
 import { Events, EventStatus } from '../entities/events.entity';
 import { UserRole } from '../../../common/constants/roles.constant';
+import { DataSource } from 'typeorm';
+import { Bookings } from '../../bookings/entities/bookings.entity';
 
 
 
@@ -16,6 +18,7 @@ import { UserRole } from '../../../common/constants/roles.constant';
 export class EventsService {
   constructor(
     private readonly eventsRepository: EventsRepository,
+    private readonly dataSource: DataSource,
   ) { }
 
   /**
@@ -245,7 +248,7 @@ export class EventsService {
 
   /**
   * Delete event
-  * Only if no confirmed bookings exist
+  * Delete all bookings before deletion
   */
   async remove(id: string, userId: string, userRole: UserRole): Promise<void> {
     const event = await this.findOne(id);
@@ -255,9 +258,14 @@ export class EventsService {
       throw new ForbiddenException('You can only delete events you created');
     }
 
-    // Cannot delete event with existing bookings
+    // Delete all bookings if exist
     if (event.currentBookings > 0) {
-      throw new BadRequestException('Cannot delete event with existing bookings');
+      await this.dataSource
+        .createQueryBuilder()
+        .delete()
+        .from(Bookings)
+        .where('eventId = :eventId', { eventId: id })
+        .execute();
     }
 
     await this.eventsRepository.remove(id);
