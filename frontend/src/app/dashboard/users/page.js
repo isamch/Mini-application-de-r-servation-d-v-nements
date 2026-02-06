@@ -177,20 +177,24 @@ export default function UsersPage() {
           <h1 className="text-3xl font-bold text-gray-900">Users Management</h1>
           <p className="text-gray-600 mt-2">Manage system users and their permissions</p>
         </div>
+        <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
+          <UserPlus className="w-4 h-4 mr-2" />
+          Add New User
+        </Button>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+      <div className="bg-white rounded-xl shadow-sm border-2 border-gray-200 p-6 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
             <input
               type="text"
               placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
             />
           </div>
 
@@ -198,7 +202,7 @@ export default function UsersPage() {
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all cursor-pointer"
           >
             <option value="all">All Roles</option>
             <option value="admin">Admin</option>
@@ -209,7 +213,7 @@ export default function UsersPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all cursor-pointer"
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
@@ -325,21 +329,6 @@ export default function UsersPage() {
                                 <ShieldCheck className="w-4 h-4 mr-3 text-gray-500" />
                                 {userData.isActive ? 'Deactivate' : 'Activate'}
                               </button>
-
-                              <div className="px-4 py-2">
-                                <label className="block text-xs text-gray-500 mb-1">Change Role</label>
-                                <select
-                                  value={userData.role}
-                                  onChange={(e) => {
-                                    handleRoleChange(userData.id, e.target.value);
-                                    setShowDropdown(null);
-                                  }}
-                                  className="w-full px-2 py-1 border border-gray-200 rounded text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                                >
-                                  <option value="participant">Participant</option>
-                                  <option value="admin">Admin</option>
-                                </select>
-                              </div>
 
                               <hr className="my-2" />
                               
