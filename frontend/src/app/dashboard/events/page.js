@@ -57,7 +57,9 @@ export default function EventsPage() {
         params.append('status', filterParams.status);
       }
       
-      const response = await api.get(`/events?${params.toString()}`);
+      // Use different endpoint based on user role
+      const endpoint = user?.role === 'admin' ? '/events' : '/events/published';
+      const response = await api.get(`${endpoint}?${params.toString()}`);
       let filteredEvents = response.data.data;
       
       if (filterParams.search) {
@@ -279,13 +281,20 @@ export default function EventsPage() {
                   </Link>
                   
                   <div className="flex items-center justify-between mb-4">
-                    <span className={`px-3 py-1 text-white text-xs font-medium rounded-full ${
-                      event.status === 'published' ? 'bg-gradient-to-r from-emerald-500 to-teal-600' :
-                      event.status === 'draft' ? 'bg-gradient-to-r from-yellow-500 to-orange-500' :
-                      'bg-gradient-to-r from-red-500 to-pink-600'
-                    }`}>
-                      {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-3 py-1 text-white text-xs font-medium rounded-full ${
+                        event.status === 'published' ? 'bg-gradient-to-r from-emerald-500 to-teal-600' :
+                        event.status === 'draft' ? 'bg-gradient-to-r from-yellow-500 to-orange-500' :
+                        'bg-gradient-to-r from-red-500 to-pink-600'
+                      }`}>
+                        {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                      </span>
+                      {user?.id === event.createdById && (
+                        <span className="px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-medium rounded-full">
+                          Mine
+                        </span>
+                      )}
+                    </div>
                     {isAlmostFull && event.status === 'published' && (
                       <span className="px-3 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-medium rounded-full">
                         Almost Full

@@ -333,8 +333,11 @@ export class EventsService {
       throw new BadRequestException('Event is not available for booking');
     }
 
-    // Check if event is in the future
-    if (new Date(event.date) <= new Date()) {
+    // Check if event start time is in the future
+    const now = new Date();
+    const eventStartDateTime = new Date(`${event.date.toISOString().split('T')[0]}T${event.startTime}`);
+    
+    if (eventStartDateTime <= now) {
       throw new BadRequestException('Cannot book past events');
     }
 

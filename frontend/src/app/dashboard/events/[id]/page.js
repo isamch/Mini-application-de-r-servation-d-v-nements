@@ -16,6 +16,7 @@ export default function EventDetailsPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [notes, setNotes] = useState('');
+  const [userBooking, setUserBooking] = useState(null);
   const { id } = useParams();
   const { user } = useAuth();
   const toast = useToast();
@@ -42,6 +43,18 @@ export default function EventDetailsPage() {
     try {
       const response = await api.get(`/events/${id}`);
       setEvent(response.data.data);
+      
+      // Check if user has existing booking for this event
+      if (user && user.role === 'participant') {
+        try {
+          const bookingsResponse = await api.get('/bookings/my');
+          const bookings = bookingsResponse.data.data || bookingsResponse.data;
+          const existingBooking = bookings.find(b => b.eventId === id);
+          setUserBooking(existingBooking || null);
+        } catch (error) {
+          console.error('Error fetching user bookings:', error);
+        }
+      }
     } catch (error) {
       console.error('Error fetching event:', error);
       toast.error('Event not found');
@@ -304,7 +317,7 @@ export default function EventDetailsPage() {
             </div>
 
             {/* Booking Form for Participants */}
-            {user && user.role === 'participant' && canBook && (
+            {user && user.role === 'participant' && canBook && !userBooking && (
               <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 p-8">
                 <h3 className="text-2xl font-bold text-gray-900 mb-6">Book This Event</h3>
                 
@@ -330,6 +343,41 @@ export default function EventDetailsPage() {
                 >
                   {bookingLoading ? 'Processing...' : 'Book Now'}
                 </Button>
+              </div>
+            )}
+
+            {/* User Already Booked */}
+            {user && user.role === 'participant' && userBooking && (
+              <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 p-8">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Your Booking Status</h3>
+                <div className="flex items-center space-x-3 mb-4">
+                  {userBooking.status === 'pending' && (
+                    <span className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+                      ⏳ Pending Approval
+                    </span>
+                  )}
+                  {userBooking.status === 'confirmed' && (
+                    <span className="px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                      ✓ Confirmed
+                    </span>
+                  )}
+                  {userBooking.status === 'refused' && (
+                    <span className="px-4 py-2 bg-red-100 text-red-800 rounded-full text-sm font-medium">
+                      ✗ Refused
+                    </span>
+                  )}
+                  {userBooking.status === 'canceled' && (
+                    <span className="px-4 py-2 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">
+                      ✗ Canceled
+                    </span>
+                  )}
+                </div>
+                <p className="text-gray-600">
+                  {userBooking.status === 'pending' && 'Your booking is awaiting admin approval.'}
+                  {userBooking.status === 'confirmed' && 'Your booking has been confirmed! Check your email for the ticket.'}
+                  {userBooking.status === 'refused' && 'Your booking was refused. You can book again if needed.'}
+                  {userBooking.status === 'canceled' && 'Your booking was canceled.'}
+                </p>
               </div>
             )}
 
